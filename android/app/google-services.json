@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "442519218501",
+    "project_id": "exchnage-wallet-kurd",
+    "storage_bucket": "exchnage-wallet-kurd.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:442519218501:android:1911535a60385ee387762c",
+        "android_client_info": {
+          "package_name": "com.example.exchnage_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAYPu7eUiCA-osFo7S-RwcdhWERoMy0erw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
