@@ -1,43 +1,55 @@
+import 'package:exchnage_app/models/BranchModel.dart';
 import 'package:flutter/material.dart';
-import 'package:exchnage_app/widgets/icons_list.dart'; // Make sure this path is correct
 
-class CategoryDropDown extends StatelessWidget {
+class CategoryDropDown extends StatefulWidget {
   CategoryDropDown({
-    super.key,
+    Key? key,
     required this.onChanged,
-    this.cattype,
-  });
+    required this.branches,
+    this.branch,
+  }) : super(key: key);
 
-  final String? cattype;
-  final ValueChanged<String?> onChanged;
-  var appIcons = AppIcons();
+  final BranchModel? branch;
+  List<BranchModel> branches = [];
+  final ValueChanged<BranchModel?> onChanged;
 
   @override
+  State<CategoryDropDown> createState() => _CategoryDropDownState();
+}
+
+class _CategoryDropDownState extends State<CategoryDropDown> {
+  @override
   Widget build(BuildContext context) {
-    return DropdownButton<String>(
-        value: cattype,
-        isExpanded: true,
-        hint: Text('Select Category'),
-        items: appIcons.homeExchangeCategories.map((category) {
-          return DropdownMenuItem<String>(
-            value: category['name'],
-            child: Row(
-              children: [
-                Image.asset(
-                  category['image'], // Using image assets
-                  width: 30,
-                  height: 30,
-                  fit: BoxFit.cover,
-                ),
-                SizedBox(width: 10),
-                Text(
-                  category['name'],
-                  style: TextStyle(color: Colors.black),
-                ),
-              ],
-            ),
-          );
-        }).toList(),
-        onChanged: onChanged);
+    return DropdownButton<BranchModel>(
+      value: widget.branch,
+      isExpanded: true,
+      hint: const Text('Select Category'),
+      items: widget.branches.map((branch) {
+        return DropdownMenuItem<BranchModel>(
+          value: branch, // Changed to BranchModel
+          child: Row(
+            children: [
+              Image.network(
+                branch.iconUrl ?? '', // Using network images
+                width: 30,
+                height: 30,
+                fit: BoxFit.cover,
+              ),
+              const SizedBox(width: 10),
+              Text(
+                branch.branchName ?? '',
+                style: const TextStyle(color: Colors.black),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                ' - ${branch.currency}',
+                style: const TextStyle(color: Colors.black),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+      onChanged: widget.onChanged, // Changed to accept BranchModel
+    );
   }
 }

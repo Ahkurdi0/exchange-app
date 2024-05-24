@@ -6,7 +6,6 @@ class AppIcons {
       "name": 'AsiaPay',
       "image": 'assets/icons/asiapay.png',
       'qrcode': 'assets/qr/fib_qr.png',
-      
     },
     {
       "name": 'ZainCash',

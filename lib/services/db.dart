@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:exchnage_app/models/BranchModel.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -13,7 +14,7 @@ class Db {
       showDialog(
         context: context,
         builder: (context) {
-          return AlertDialog(
+          return const AlertDialog(
             title: Text('Error'),
             content: Text('No authenticated user found.'),
           );
@@ -24,9 +25,7 @@ class Db {
 
     try {
       await users.doc(currentUser.uid).set(data);
-      print('User Added');
     } catch (e) {
-      print('Failed to add user: $e');
       showDialog(
         context: context,
         builder: (context) {
@@ -37,5 +36,18 @@ class Db {
         },
       );
     }
+  }
+
+  Future<List<BranchModel>> getBranches() async {
+    final CollectionReference branches =
+        FirebaseFirestore.instance.collection('branches');
+    final QuerySnapshot snapshot = await branches.get();
+    return snapshot.docs.map((doc) => BranchModel.fromSnap(doc)).toList();
+  }
+
+  Future<void> addBranch(BranchModel branch) async {
+    final CollectionReference branches =
+        FirebaseFirestore.instance.collection('branches');
+    await branches.doc(branch.uId).set(branch.toMap());
   }
 }

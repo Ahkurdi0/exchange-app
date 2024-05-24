@@ -33,32 +33,32 @@ class _HomePageExchangeState extends State<HomePageExchange> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // backgroundColor: Colors.white,
-      //   floatingActionButton: FloatingActionButton(
-      //     backgroundColor: Color.fromARGB(255, 0, 38, 255),
-      //     onPressed: () {
-      //       _dialoBuildder(context);
-      //     },
-      //     child: Icon(
-      //       Icons.add,
-      //       color: Colors.white,
-      //     ),
-      //   ),
+        // backgroundColor: Colors.white,
+        //   floatingActionButton: FloatingActionButton(
+        //     backgroundColor: Color.fromARGB(255, 0, 38, 255),
+        //     onPressed: () {
+        //       _dialoBuildder(context);
+        //     },
+        //     child: Icon(
+        //       Icons.add,
+        //       color: Colors.white,
+        //     ),
+        //   ),
         body: Container(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(
-                  20, MediaQuery.of(context).size.height * 0.1, 20, 0),
-              child: Column(
-                children: [
-                  // TransactionsCard(),
-                  AddTransactionForm(),
-                ],
-              ),
-            ),
+      width: MediaQuery.of(context).size.width,
+      height: MediaQuery.of(context).size.height,
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+              20, MediaQuery.of(context).size.height * 0.1, 20, 0),
+          child: Column(
+            children: [
+              // TransactionsCard(),
+              AddTransactionForm(),
+            ],
           ),
-        ));
+        ),
+      ),
+    ));
   }
 }

@@ -66,7 +66,7 @@ class _SignUpState extends State<SignUp> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFEBF5FF),
+      backgroundColor: const Color(0xFFEBF5FF),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -74,11 +74,11 @@ class _SignUpState extends State<SignUp> {
           child: SingleChildScrollView(
             child: Column(
               children: [
-                SizedBox(
+                const SizedBox(
                   height: 50,
                 ),
-                SizedBox(height: 16),
-                Text(
+                const SizedBox(height: 16),
+                const Text(
                   'Create new Account',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
@@ -87,7 +87,7 @@ class _SignUpState extends State<SignUp> {
                   ),
                   textAlign: TextAlign.center,
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 16,
                 ),
                 TextFormField(
@@ -96,35 +96,36 @@ class _SignUpState extends State<SignUp> {
                     decoration:
                         _buildInputDecoration('First Name', Icons.person),
                     validator: appValidator.validateUserName),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 TextFormField(
                     controller: _lastNameController,
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     decoration:
                         _buildInputDecoration('Last Name', Icons.person),
                     validator: appValidator.validateUserName),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     decoration: _buildInputDecoration('Email', Icons.email),
                     validator: appValidator.validateEmail),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 TextFormField(
                     controller: _phoneController,
                     keyboardType: TextInputType.phone,
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     decoration:
                         _buildInputDecoration('Phone Number', Icons.phone),
-                    validator: appValidator.validatePhoneNumber),
-                SizedBox(height: 16),
+                    validator: (value) =>
+                        appValidator.phoneNumberValidator(value)),
+                const SizedBox(height: 16),
                 TextFormField(
                     controller: _passwordController,
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     decoration: _buildInputDecoration('Password', Icons.lock),
                     validator: appValidator.validatePassword),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 SizedBox(
                   height: 50,
                   width: double.infinity,
@@ -133,17 +134,17 @@ class _SignUpState extends State<SignUp> {
                       isLoader ? print("Loading") : _submitForm();
                     },
                     child: isLoader
-                        ? Center(child: CircularProgressIndicator())
-                        : Text(
+                        ? const Center(child: CircularProgressIndicator())
+                        : const Text(
                             'Create Account',
                             style: TextStyle(color: Colors.white, fontSize: 20),
                           ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF0B59D7),
+                      backgroundColor: const Color(0xFF0B59D7),
                     ),
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 30,
                 ),
                 TextButton(
@@ -171,9 +172,9 @@ class _SignUpState extends State<SignUp> {
       fillColor: Colors.white, // Set the fill color to white
       filled: true, // Enable the fillColor to take effect
       labelText: labelText,
-      labelStyle: TextStyle(color: Color.fromARGB(255, 94, 94, 94)),
+      labelStyle: const TextStyle(color: Color.fromARGB(255, 94, 94, 94)),
       suffixIcon: Icon(suffixIcon,
-          color: Color(0xFF0B59D7)), // Icon color remains the same
+          color: const Color(0xFF0B59D7)), // Icon color remains the same
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(15),
         borderSide:

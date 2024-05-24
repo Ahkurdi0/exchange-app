@@ -17,12 +17,12 @@ class AppValidator {
     return null;
   }
 
-  String? validatePhoneNumber(value) {
-    if (value.isEmpty) {
-      return 'Please enter your phone number';
-    }
-    if (value.length != 10) {
-      return 'Please enter a 10-digital phone number';
+  phoneNumberValidator(String? value) {
+    RegExp regExp = RegExp(r'^07[0-9]{9}$');
+    if (value?.isEmpty ?? true) {
+      return "Please enter phone number! 07**";
+    } else if (!regExp.hasMatch(value!)) {
+      return "Please enter a valid phone number 07******** !";
     }
     return null;
   }

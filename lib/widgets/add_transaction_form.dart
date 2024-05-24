@@ -1,3 +1,5 @@
+import 'package:exchnage_app/models/BranchModel.dart';
+import 'package:exchnage_app/services/db.dart';
 import 'package:exchnage_app/widgets/icons_list.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:exchnage_app/widgets/category_dropdown.dart';
@@ -16,8 +18,8 @@ class AddTransactionForm extends StatefulWidget {
 }
 
 class _AddTransactionFormState extends State<AddTransactionForm> {
-  String categoryOne = 'AsiaPay';
-  String categoryTwo = 'Fib';
+  BranchModel? categoryOne;
+  BranchModel? categoryTwo;
 
   Map<String, dynamic> selectedCategory = {};
 
@@ -30,11 +32,15 @@ class _AddTransactionFormState extends State<AddTransactionForm> {
   var reciverInfoEditControl = TextEditingController();
   var commission = 0;
   var commissionType = 0.02;
-  var uid = Uuid();
+  var uid = const Uuid();
+  final db = Db();
+  List<BranchModel> branches = [];
 
   @override
   void initState() {
     super.initState();
+
+    db.getBranches().then((value) => setState(() => branches = value));
     sendEditControl.addListener(() {
       if (sendEditControl.text.isNotEmpty) {
         try {
@@ -82,12 +88,12 @@ class _AddTransactionFormState extends State<AddTransactionForm> {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text('Invalid Input'),
+          title: const Text('Invalid Input'),
           content: Text(errorMessage),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text('OK'),
+              child: const Text('OK'),
             ),
           ],
         ),
@@ -102,7 +108,7 @@ class _AddTransactionFormState extends State<AddTransactionForm> {
 
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content:
               Text("You are not logged in. Please log in and try again.")));
       setState(() {
@@ -127,8 +133,8 @@ class _AddTransactionFormState extends State<AddTransactionForm> {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text('User not found'),
-          content: Text('No such user exists in the database.'),
+          title: const Text('User not found'),
+          content: const Text('No such user exists in the database.'),
           actions: [
             TextButton(
               onPressed: () {
@@ -137,7 +143,7 @@ class _AddTransactionFormState extends State<AddTransactionForm> {
                   isLoader = false;
                 });
               },
-              child: Text('OK'),
+              child: const Text('OK'),
             ),
           ],
         ),
@@ -188,8 +194,8 @@ class _AddTransactionFormState extends State<AddTransactionForm> {
       sendEditControl.clear();
       reciveEditControl.clear();
       reciverInfoEditControl.clear();
-      categoryOne = 'AsiaPay';
-      categoryTwo = 'Fib';
+      // categoryOne = 'Fib';
+      // categoryTwo = 'Fib';
       updateCategory();
       isLoader = false;
     });
@@ -204,52 +210,100 @@ class _AddTransactionFormState extends State<AddTransactionForm> {
           padding: const EdgeInsets.all(8.0),
           child: Column(
             children: [
-              Operator(),
-              SizedBox(height: 40),
+              const Operator(),
+              const SizedBox(height: 40),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('You Send', style: TextStyle(fontSize: 22)),
-                  SizedBox(height: 6),
+                  const Text('You Send', style: TextStyle(fontSize: 22)),
+                  const SizedBox(height: 6),
                   CategoryDropDown(
-                    cattype: categoryOne,
-                    onChanged: (String? value) {
+                    branches: branches
+                        .where((branch) =>
+                            categoryTwo == null ||
+                            branch.uId != categoryTwo!.uId)
+                        .toList(),
+                    branch: categoryOne,
+                    onChanged: (BranchModel? value) {
                       if (value != null) {
-                        setState(() {
-                          categoryOne = value;
-                          updateCategory();
-                        });
+                        if (categoryTwo != null &&
+                            value.uId == categoryTwo!.uId) {
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text('Invalid Selection'),
+                              content: const Text(
+                                  'Category One and Category Two cannot be the same.'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.of(context).pop(),
+                                  child: const Text('OK'),
+                                ),
+                              ],
+                            ),
+                          );
+                        } else {
+                          setState(() {
+                            categoryOne = value;
+                            updateCategory();
+                          });
+                        }
                       }
                     },
                   ),
-                  SizedBox(height: 16),
-                  Text('You Get', style: TextStyle(fontSize: 22)),
-                  CategoryDropDown(
-                    cattype: categoryTwo,
-                    onChanged: (String? value) {
-                      if (value != null) {
-                        setState(() {
-                          categoryTwo = value;
-                          updateCategory();
-                        });
-                      }
-                    },
-                  ),
-                  SizedBox(height: 16),
-                  Text('Send the amount', style: TextStyle(fontSize: 22)),
+                  const SizedBox(height: 16),
+                  const Text('Send the amount', style: TextStyle(fontSize: 22)),
                   TextFormField(
                     controller: sendEditControl,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
-                        hintText: 'Enter amount between 30,000 and 3,000,000'),
+                        hintText: '0',
+                        suffix: Text(categoryOne?.currency ?? 'IQD')),
                   ),
-                  Text('Minimum amount: 30,000 Maximum : 3,000,000',
+                  const Text('Minimum amount: 30,000 Maximum : 3,000,000',
                       style: TextStyle(fontSize: 14, color: Colors.red)),
-                  SizedBox(height: 16),
-                  Text('Get the amount', style: TextStyle(fontSize: 22)),
+                  const SizedBox(height: 16),
+
+                  const Text('You Get', style: TextStyle(fontSize: 22)),
+                  CategoryDropDown(
+                    branches: branches
+                        .where((branch) =>
+                            categoryOne == null ||
+                            branch.uId != categoryOne!.uId)
+                        .toList(),
+                    branch: categoryTwo,
+                    onChanged: (BranchModel? value) {
+                      if (value != null) {
+                        if (categoryOne != null &&
+                            value.uId == categoryOne!.uId) {
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text('Invalid Selection'),
+                              content: const Text(
+                                  'Category One and Category Two cannot be the same.'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.of(context).pop(),
+                                  child: const Text('OK'),
+                                ),
+                              ],
+                            ),
+                          );
+                        } else {
+                          setState(() {
+                            categoryTwo = value;
+                            updateCategory();
+                          });
+                        }
+                      }
+                    },
+                  ),
+
+                  const SizedBox(height: 16),
+                  const Text('Get the amount', style: TextStyle(fontSize: 22)),
                   TextFormField(
                     controller: reciveEditControl,
-                    readOnly: true,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                       hintText: '0',
@@ -257,43 +311,58 @@ class _AddTransactionFormState extends State<AddTransactionForm> {
                         borderRadius: BorderRadius.circular(8.0),
                       ),
                       enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                            color: const Color.fromARGB(255, 214, 214, 214),
+                        borderSide: const BorderSide(
+                            color: Color.fromARGB(255, 214, 214, 214),
                             width: 1.0),
                         borderRadius: BorderRadius.circular(8.0),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.blue, width: 2.0),
+                        borderSide:
+                            const BorderSide(color: Colors.blue, width: 2.0),
                         borderRadius: BorderRadius.circular(8.0),
                       ),
                       fillColor: Colors.white,
                       filled: true,
-                      hintStyle: TextStyle(color: Colors.grey),
-                      contentPadding: EdgeInsets.all(10),
+                      hintStyle: const TextStyle(color: Colors.grey),
+                      contentPadding: const EdgeInsets.all(10),
                     ),
                   ),
                   Text('Commission: $commission',
-                      style: TextStyle(fontSize: 14, color: Colors.red)),
-                  SizedBox(height: 16),
-                  Text('Your $categoryTwo number',
-                      style: TextStyle(fontSize: 22)),
-                  TextFormField(
-                    controller: reciverInfoEditControl,
-                    keyboardType: TextInputType.number,
-                    decoration:
-                        InputDecoration(hintText: 'Your $categoryTwo number'),
-                  ),
-                  SizedBox(height: 16),
+                      style: const TextStyle(fontSize: 14, color: Colors.red)),
+                  // const SizedBox(height: 16),
+                  // Text('Your $categoryTwo number',
+                  //     style: const TextStyle(fontSize: 22)),
+                  // TextFormField(
+                  //   controller: reciverInfoEditControl,
+                  //   keyboardType: TextInputType.number,
+                  //   decoration:
+                  //       InputDecoration(hintText: 'Your $categoryTwo number'),
+                  // ),
+                  // const SizedBox(height: 16),
                   Center(
                     child: ElevatedButton(
                       onPressed: () {
-                        if (!isLoader) {
-                          _submitForm();
-                        }
+                        // if (!isLoader) {
+                        //   _submitForm();
+                        // }
+
+                        BranchModel branchModel = BranchModel(
+                            api: "https:v1/api",
+                            branchName: "Zain Cash",
+                            commissionAmount: 0.15,
+                            hasApi: true,
+                            iconUrl:
+                                "https://firebasestorage.googleapis.com/v0/b/exchnage-wallet-kurd.appspot.com/o/icons%2Fzaincash.png?alt=media&token=b721565b-8141-4b37-b221-1e50c530261a",
+                            phoneNumber: "",
+                            qrCodeUrl: "",
+                            qrCodeValue: "",
+                            uId: uid.v4());
+
+                        Db().addBranch(branchModel);
                       },
                       child: isLoader
-                          ? CircularProgressIndicator()
-                          : Text('Exchange'),
+                          ? const CircularProgressIndicator()
+                          : const Text('Exchange'),
                     ),
                   ),
                 ],
