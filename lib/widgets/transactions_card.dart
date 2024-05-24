@@ -1,15 +1,12 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:exchnage_app/widgets/icons_list.dart';
+import 'package:exchnage_app/models/TransactionModel.dart';
+import 'package:exchnage_app/services/db.dart';
 import 'package:exchnage_app/widgets/transaction_card.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-class TransactionsCard extends StatelessWidget {
-  TransactionsCard({super.key});
-
-  var appIcons = AppIcons();
+class TransactionsPage extends StatelessWidget {
+  const TransactionsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -17,12 +14,12 @@ class TransactionsCard extends StatelessWidget {
       padding: const EdgeInsets.all(15),
       child: Column(
         children: [
-          Row(
+          const Row(
             children: [
               Text(
                 'Recent Transactions',
                 style: TextStyle(
-                    color: const Color.fromARGB(255, 0, 0, 0),
+                    color: Color.fromARGB(255, 0, 0, 0),
                     fontSize: 20,
                     fontWeight: FontWeight.w600),
               ),
@@ -41,37 +38,37 @@ class RecentTransactionList extends StatelessWidget {
   });
 
   final userId = FirebaseAuth.instance.currentUser!.uid;
+  final db = Db();
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('users')
-            .doc(userId)
-            .collection('transactions')
-            .orderBy('timestamp', descending: true).limit(10)
-            .snapshots(),
-        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          if (snapshot.hasError) {
-            return Text('Something went wrong');
-          } else if (snapshot.connectionState == ConnectionState.waiting) {
-            return Text("Loading");
-          }
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return Center(child: Text("No History Exchnage Found"));
-          }
-          var data = snapshot.data!.docs;
+    return StreamBuilder<List<TransactionModel>>(
+      stream: db
+          .getUserTransactionsForMonth(DateTime.now(), 'completed')
+          .asStream(),
+      builder: (BuildContext context,
+          AsyncSnapshot<List<TransactionModel>> snapshot) {
+        if (snapshot.hasError) {
+          return const Text('Something went wrong');
+        } else if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Text("Loading");
+        }
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const Center(child: Text("No Recent Transactions Found"));
+        }
+        var data = snapshot.data!;
 
-          return ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: data.length,
-              itemBuilder: (context, index) {
-                var cardData = data[index];
-                return TransactionCard(
-                  data: cardData ,
-                );
-              });
-        });
+        return ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: data.length,
+            itemBuilder: (context, index) {
+              var transaction = data[index];
+              return TransactionCard(
+                transaction: transaction,
+              );
+            });
+      },
+    );
   }
 }

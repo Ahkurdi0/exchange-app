@@ -1,40 +1,38 @@
+import 'package:exchnage_app/models/TransactionModel.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:exchnage_app/widgets/icons_list.dart'; // Ensure this contains the correct path and class definition
-import 'package:exchnage_app/pages/detail_page.dart'; // Check this path is correct
 
 class TransactionCard extends StatelessWidget {
-  TransactionCard({
+  const TransactionCard({
     super.key,
-    required this.data,
+    required this.transaction,
   });
 
-  final dynamic data;
-  var appIcons = AppIcons(); // This should refer to the updated AppIcons class with image paths
+  final TransactionModel transaction;
 
   @override
   Widget build(BuildContext context) {
-    DateTime date = DateTime.fromMillisecondsSinceEpoch(data['timestamp']);
-    String formattedDate = DateFormat('d MMM hh:mm a').format(date);
-
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
       child: Material(
-        color: Color.fromARGB(255, 198, 235, 255), // Background color of the whole card
+        color: const Color.fromARGB(
+            255, 198, 235, 255), // Background color of the whole card
         borderRadius: BorderRadius.circular(20),
         child: InkWell(
           onTap: () {
             // Define the action when the card is clicked
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => DetailsPage(data: data), // Navigate to the details page
-              ),
-            );
+            // Navigator.push(
+            //   context,
+            //   MaterialPageRoute(
+            //     builder: (context) => DetailsPage(
+            //         transaction: transaction), // Navigate to the details page
+            //   ),
+            // );
           },
           borderRadius: BorderRadius.circular(20),
-          highlightColor: Colors.grey.withOpacity(0.2), // Highlight color when pressed
+          highlightColor:
+              Colors.grey.withOpacity(0.2), // Highlight color when pressed
           splashColor: Colors.grey.withOpacity(0.1), // Splash color
           child: Container(
             decoration: BoxDecoration(
@@ -44,13 +42,14 @@ class TransactionCard extends StatelessWidget {
                   color: Colors.grey.withOpacity(0.09),
                   blurRadius: 10.0,
                   spreadRadius: 1,
-                  offset: Offset(0, 10),
+                  offset: const Offset(0, 10),
                 ),
               ],
             ),
             child: ListTile(
               minVerticalPadding: 10,
-              contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
               leading: Container(
                 width: 100,
                 height: 100,
@@ -61,8 +60,8 @@ class TransactionCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    Image.asset(
-                      appIcons.getExchangeCategoryImage('${data['categoryOne']}'),
+                    Image.network(
+                      transaction.fromBranch?.iconUrl ?? '',
                       width: 40,
                       height: 40,
                       fit: BoxFit.cover,
@@ -72,8 +71,8 @@ class TransactionCard extends StatelessWidget {
                       color: Colors.grey.withOpacity(0.2),
                       size: 20,
                     ),
-                    Image.asset(
-                      appIcons.getExchangeCategoryImage('${data['categoryTwo']}'),
+                    Image.network(
+                      transaction.toBranch?.iconUrl ?? '',
                       width: 40,
                       height: 40,
                       fit: BoxFit.cover,
@@ -83,13 +82,13 @@ class TransactionCard extends StatelessWidget {
               ),
               title: Row(
                 children: [
-                  Text("${data['categoryOne']}"),
-                  Text(' to '),
-                  Text(data['categoryTwo']),
-                  Spacer(),
+                  Text(transaction.fromBranch?.branchName ?? ''),
+                  const Text(' to '),
+                  Text(transaction.toBranch?.branchName ?? ''),
+                  const Spacer(),
                   Text(
-                    "${data['recive']}",
-                    style: TextStyle(color: Colors.green),
+                    transaction.receivingAmount.toString(),
+                    style: const TextStyle(color: Colors.green),
                   ),
                 ],
               ),
@@ -97,17 +96,17 @@ class TransactionCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Row(
                     children: [
                       Text(
-                        formattedDate,
-                        style: TextStyle(color: Colors.grey),
+                        transaction.createdAt?.toIso8601String() ?? '',
+                        style: const TextStyle(color: Colors.grey),
                       ),
-                      Spacer(),
+                      const Spacer(),
                       Text(
-                        "${data['reciverInfo']}",
-                        style: TextStyle(
+                        transaction.toPhone ?? '',
+                        style: const TextStyle(
                           color: Color.fromARGB(255, 0, 47, 255),
                         ),
                       ),

@@ -1,6 +1,9 @@
 import 'package:exchnage_app/models/BranchModel.dart';
 import 'package:exchnage_app/models/ExchangeRateModel.dart';
+import 'package:exchnage_app/models/TransactionModel.dart';
+import 'package:exchnage_app/pages/review_page.dart';
 import 'package:exchnage_app/services/db.dart';
+import 'package:exchnage_app/utils/appvalidator.dart';
 import 'package:exchnage_app/widgets/icons_list.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:exchnage_app/widgets/category_dropdown.dart';
@@ -30,7 +33,7 @@ class _AddTransactionFormState extends State<AddTransactionForm> {
 
   var sendEditControl = TextEditingController();
   var reciveEditControl = TextEditingController();
-  var reciverInfoEditControl = TextEditingController();
+  var toPhoneController = TextEditingController();
   double commission = 0;
   double ownerCommission = 0.01;
   var uid = const Uuid();
@@ -56,26 +59,40 @@ class _AddTransactionFormState extends State<AddTransactionForm> {
       );
       exchangeRate = rate.rate ?? 1.0;
     }
-    reciveEditControl.text = ((amount * exchangeRate)).toString();
+    reciveEditControl.text = ((amount * exchangeRate) - commission).toString();
   }
 
 //  submit the data
-  Future<void> _submitForm() async {
-    double sendAmount = double.tryParse(sendEditControl.text) ?? 0;
-    if (sendEditControl.text.isEmpty ||
-        reciveEditControl.text.isEmpty ||
-        reciverInfoEditControl.text.isEmpty ||
-        sendAmount < 30000 ||
-        sendAmount > 3000000) {
-      String errorMessage = 'Please check and fill all the fields correctly.';
-      if (sendAmount < 30000 || sendAmount > 3000000) {
-        errorMessage = 'Amount must be between 30,000 and 3,000,000.';
-      }
+  void navigateToReviewPage() async {
+    TransactionModel transaction = TransactionModel(
+      uId: uid.v4(),
+      status: 'pending',
+      totalCommission: commission,
+      fromBranch: categoryOne,
+      toBranch: categoryTwo,
+      sendingAmount: double.tryParse(sendEditControl.value.text),
+      receivingAmount: double.tryParse(reciveEditControl.value.text),
+      toPhone: toPhoneController.value.text,
+      createdAt: DateTime.now(),
+      // Add other fields as necessary
+    );
+
+    if (_formKey.currentState!.validate() &&
+        transaction.totalCommission != null &&
+        transaction.fromBranch != null &&
+        transaction.toBranch != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ReviewPage(transaction: transaction),
+        ),
+      );
+    } else {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
           title: const Text('Invalid Input'),
-          content: Text(errorMessage),
+          content: const Text('Please fill all the fields.'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
@@ -84,104 +101,150 @@ class _AddTransactionFormState extends State<AddTransactionForm> {
           ],
         ),
       );
-      Vibration.vibrate();
-      return;
     }
 
-    setState(() {
-      isLoader = true;
-    });
+    // showDialog(
+    //   context: context,
+    //   builder: (context) => AlertDialog(
+    //     title: const Text('Invalid Input'),
+    //     content: Column(
+    //       children: [
+    //         Text(categoryOne?.branchName ?? ''),
+    //         Text(categoryTwo?.branchName ?? ''),
+    //         Text(sendEditControl.value.text),
+    //         Text(reciveEditControl.value.text),
+    //       ],
+    //     ),
+    //     actions: [
+    //       TextButton(
+    //         onPressed: () => Navigator.of(context).pop(),
+    //         child: const Text('OK'),
+    //       ),
+    //     ],
+    //   ),
+    // );
 
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content:
-              Text("You are not logged in. Please log in and try again.")));
-      setState(() {
-        isLoader = false;
-      });
-      return;
-    }
+    // double sendAmount = double.tryParse(sendEditControl.text) ?? 0;
+    // if (sendEditControl.text.isEmpty ||
+    //     reciveEditControl.text.isEmpty ||
+    //     toPhoneController.text.isEmpty ||
+    //     sendAmount < 30000 ||
+    //     sendAmount > 3000000) {
+    //   String errorMessage = 'Please check and fill all the fields correctly.';
+    //   if (sendAmount < 30000 || sendAmount > 3000000) {
+    //     errorMessage = 'Amount must be between 30,000 and 3,000,000.';
+    //   }
+    //   showDialog(
+    //     context: context,
+    //     builder: (context) => AlertDialog(
+    //       title: const Text('Invalid Input'),
+    //       content: Text(errorMessage),
+    //       actions: [
+    //         TextButton(
+    //           onPressed: () => Navigator.of(context).pop(),
+    //           child: const Text('OK'),
+    //         ),
+    //       ],
+    //     ),
+    //   );
+    //   Vibration.vibrate();
+    //   return;
+    // }
 
-    int timestamp = DateTime.now().microsecondsSinceEpoch;
-    var recive = int.parse(reciveEditControl.text);
-    var reciverInfo = int.parse(reciverInfoEditControl.text);
-    DateTime date = DateTime.now();
-    var id = uid.v4();
-    String monthyear = DateFormat('MMM y').format(date);
+    // setState(() {
+    //   isLoader = true;
+    // });
 
-    final userDoc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid)
-        .get();
+    // final user = FirebaseAuth.instance.currentUser;
+    // if (user == null) {
+    //   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+    //       content:
+    //           Text("You are not logged in. Please log in and try again.")));
+    //   setState(() {
+    //     isLoader = false;
+    //   });
+    //   return;
+    // }
 
-    if (!userDoc.exists) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('User not found'),
-          content: const Text('No such user exists in the database.'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                setState(() {
-                  isLoader = false;
-                });
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      );
-      return;
-    }
+    // int timestamp = DateTime.now().microsecondsSinceEpoch;
+    // var recive = int.parse(reciveEditControl.text);
+    // var reciverInfo = int.parse(toPhoneController.text);
+    // DateTime date = DateTime.now();
+    // var id = uid.v4();
+    // String monthyear = DateFormat('MMM y').format(date);
 
-    int remainingAmount = userDoc.data()?['remainingAmount'] ?? 0;
-    int totalDebit = userDoc.data()?['totalDebit'] ?? 0;
-    int totalCredit = userDoc.data()?['totalCredit'] ?? 0;
+    // final userDoc = await FirebaseFirestore.instance
+    //     .collection('users')
+    //     .doc(user.uid)
+    //     .get();
 
-    await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
-      "remainingAmount": remainingAmount - sendAmount,
-      "totalDebit": totalDebit + sendAmount,
-      "totalCredit": totalCredit + recive,
-      "updatedAt": timestamp
-    });
+    // if (!userDoc.exists) {
+    //   showDialog(
+    //     context: context,
+    //     builder: (context) => AlertDialog(
+    //       title: const Text('User not found'),
+    //       content: const Text('No such user exists in the database.'),
+    //       actions: [
+    //         TextButton(
+    //           onPressed: () {
+    //             Navigator.of(context).pop();
+    //             setState(() {
+    //               isLoader = false;
+    //             });
+    //           },
+    //           child: const Text('OK'),
+    //         ),
+    //       ],
+    //     ),
+    //   );
+    //   return;
+    // }
 
-    var data = {
-      "id": id,
-      "send": sendAmount,
-      "recive": recive,
-      "reciverInfo": reciverInfo,
-      "categoryOne": categoryOne,
-      "categoryTwo": categoryTwo,
-      "timestamp": timestamp,
-      "monthyear": monthyear,
-      "totalCredit": totalCredit,
-      "totalDebit": totalDebit,
-      "remainingAmount": remainingAmount,
-      "category": selectedCategory['name'],
-      "type": 'pending',
-      "commission": commission,
-    };
+    // int remainingAmount = userDoc.data()?['remainingAmount'] ?? 0;
+    // int totalDebit = userDoc.data()?['totalDebit'] ?? 0;
+    // int totalCredit = userDoc.data()?['totalCredit'] ?? 0;
 
-    try {
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .collection('transactions')
-          .doc(id)
-          .set(data, SetOptions(merge: true));
-    } catch (e) {
-      print("Error writing document: $e");
-    }
+    // await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
+    //   "remainingAmount": remainingAmount - sendAmount,
+    //   "totalDebit": totalDebit + sendAmount,
+    //   "totalCredit": totalCredit + recive,
+    //   "updatedAt": timestamp
+    // });
 
-    setState(() {
-      sendEditControl.clear();
-      reciveEditControl.clear();
-      reciverInfoEditControl.clear();
-      isLoader = false;
-    });
+    // var data = {
+    //   "id": id,
+    //   "send": sendAmount,
+    //   "recive": recive,
+    //   "reciverInfo": reciverInfo,
+    //   "categoryOne": categoryOne,
+    //   "categoryTwo": categoryTwo,
+    //   "timestamp": timestamp,
+    //   "monthyear": monthyear,
+    //   "totalCredit": totalCredit,
+    //   "totalDebit": totalDebit,
+    //   "remainingAmount": remainingAmount,
+    //   "category": selectedCategory['name'],
+    //   "type": 'pending',
+    //   "commission": commission,
+    // };
+
+    // try {
+    //   await FirebaseFirestore.instance
+    //       .collection('users')
+    //       .doc(user.uid)
+    //       .collection('transactions')
+    //       .doc(id)
+    //       .set(data, SetOptions(merge: true));
+    // } catch (e) {
+    //   print("Error writing document: $e");
+    // }
+
+    // setState(() {
+    //   sendEditControl.clear();
+    //   reciveEditControl.clear();
+    //   toPhoneController.clear();
+    //   isLoader = false;
+    // });
   }
 
   @override
@@ -230,6 +293,7 @@ class _AddTransactionFormState extends State<AddTransactionForm> {
                       hintText: '0',
                       suffix: Text(categoryOne?.currency ?? 'IQD'),
                     ),
+                    validator: (value) => AppValidator().isEmptyCheak(value),
                     onChanged: (value) {
                       setState(() {
                         updateAmounts();
@@ -272,21 +336,23 @@ class _AddTransactionFormState extends State<AddTransactionForm> {
                   Text('Commission: ${commission.toStringAsFixed(2)}',
                       style: const TextStyle(fontSize: 14, color: Colors.red)),
                   const SizedBox(height: 16),
-                  // Text('Your ${categoryTwo?.branchName ?? ''} number',
-                  //     style: const TextStyle(fontSize: 22)),
-                  // TextFormField(
-                  //   controller: reciverInfoEditControl,
-                  //   keyboardType: TextInputType.number,
-                  //   decoration: InputDecoration(
-                  //       hintText:
-                  //           'Your ${categoryTwo?.branchName ?? ''} number'),
-                  // ),
-                  // const SizedBox(height: 16),
+                  Text('Your ${categoryTwo?.branchName ?? 'Fib'} number',
+                      style: const TextStyle(fontSize: 22)),
+                  TextFormField(
+                    controller: toPhoneController,
+                    keyboardType: TextInputType.number,
+                    validator: (value) =>
+                        AppValidator().phoneNumberValidator(value),
+                    decoration: InputDecoration(
+                        hintText:
+                            'Your ${categoryTwo?.branchName ?? 'Fib'} number'),
+                  ),
+                  const SizedBox(height: 16),
                   Center(
                     child: ElevatedButton(
                       onPressed: () {
                         if (!isLoader) {
-                          _submitForm();
+                          navigateToReviewPage();
                         }
 
                         // ExchangeRate exchangeRate = ExchangeRate(

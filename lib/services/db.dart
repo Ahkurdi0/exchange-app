@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:exchnage_app/models/BranchModel.dart';
 import 'package:exchnage_app/models/ExchangeRateModel.dart';
+import 'package:exchnage_app/models/TransactionModel.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -8,9 +9,9 @@ class Db {
   final firestore = FirebaseFirestore.instance;
   final CollectionReference users =
       FirebaseFirestore.instance.collection('users');
+  var currentUser = FirebaseAuth.instance.currentUser;
 
   Future<void> addUser(Map<String, dynamic> data, BuildContext context) async {
-    var currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser == null) {
       print('No user logged in');
       showDialog(
@@ -26,7 +27,7 @@ class Db {
     }
 
     try {
-      await users.doc(currentUser.uid).set(data);
+      await users.doc(currentUser?.uid).set(data);
     } catch (e) {
       showDialog(
         context: context,
@@ -64,5 +65,34 @@ class Db {
         firestore.collection('exchangeRates');
     final QuerySnapshot snapshot = await exchangeRates.get();
     return snapshot.docs.map((doc) => ExchangeRate.fromSnap(doc)).toList();
+  }
+
+  Future<void> addTransaction(TransactionModel transaction) async {
+    final CollectionReference users = firestore.collection('users');
+    await users
+        .doc(currentUser?.uid)
+        .collection('transactions')
+        .doc(transaction.uId)
+        .set(transaction.toMap());
+  }
+
+  Future<List<TransactionModel>> getUserTransactionsForMonth(
+      DateTime month, String status,
+      [BranchModel? category]) async {
+    final CollectionReference users = firestore.collection('users');
+    Query query = users
+        .doc(currentUser!.uid)
+        .collection('transactions')
+        .where('status', isEqualTo: status)
+        .orderBy('createdAt', descending: true);
+
+    if (category != null && category != 'All') {
+      query = query
+          .where('fromBranch', isEqualTo: category)
+          .where('toBranch', isEqualTo: category);
+    }
+
+    final QuerySnapshot snapshot = await query.get();
+    return snapshot.docs.map((doc) => TransactionModel.fromSnap(doc)).toList();
   }
 }

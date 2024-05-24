@@ -1,10 +1,11 @@
+import 'package:exchnage_app/models/BranchModel.dart';
+import 'package:exchnage_app/services/db.dart';
 import 'package:flutter/material.dart';
-import 'package:exchnage_app/widgets/icons_list.dart'; // Ensure this is the correct path to your icons list
 
 class CategoryList extends StatefulWidget {
   final ValueChanged<String?> onChanged;
 
-  CategoryList({super.key, required this.onChanged});
+  const CategoryList({super.key, required this.onChanged});
 
   @override
   State<CategoryList> createState() => _CategoryListState();
@@ -12,20 +13,16 @@ class CategoryList extends StatefulWidget {
 
 class _CategoryListState extends State<CategoryList> {
   String currentCategory = 'All';
-  List<Map<String, dynamic>> categoryList = [];
+  final db = Db();
+  List<BranchModel> branches = [];
   final scrollController = ScrollController();
-  var appIcons = AppIcons();
-
-  final addCat = {
-    "name": 'All',
-    "image": 'assets/icons/fib.png',
-  };
 
   @override
   void initState() {
     super.initState();
-    categoryList = appIcons.homeExchangeCategories;
-    categoryList.insert(0, addCat);
+    branches.add(const BranchModel(branchName: 'All')); // Add this line
+    db.getBranches().then((value) => setState(() => branches.addAll(value)));
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       scrollToSelectedCategory();
     });
@@ -33,12 +30,12 @@ class _CategoryListState extends State<CategoryList> {
 
   void scrollToSelectedCategory() {
     final selectedCategoryIndex =
-        categoryList.indexWhere((cat) => cat['name'] == currentCategory);
+        branches.indexWhere((cat) => cat.branchName == currentCategory);
     if (selectedCategoryIndex != -1) {
       final scrollOffset = (selectedCategoryIndex * 100.0) - 170;
       scrollController.animateTo(
         scrollOffset,
-        duration: Duration(milliseconds: 500),
+        duration: const Duration(milliseconds: 500),
         curve: Curves.ease,
       );
     }
@@ -46,29 +43,29 @@ class _CategoryListState extends State<CategoryList> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: 45,
       child: ListView.builder(
         controller: scrollController,
-        itemCount: categoryList.length,
+        itemCount: branches.length,
         scrollDirection: Axis.horizontal,
         itemBuilder: (context, index) {
-          var data = categoryList[index];
+          var data = branches[index];
           return GestureDetector(
             onTap: () {
-              if (currentCategory != data['name']) {
+              if (currentCategory != data.branchName) {
                 setState(() {
-                  currentCategory = data['name'];
-                  widget.onChanged(data['name']);
+                  currentCategory = data.branchName ?? '';
+                  widget.onChanged(data.branchName);
                 });
                 scrollToSelectedCategory();
               }
             },
             child: Container(
-              margin: EdgeInsets.all(4),
-              padding: EdgeInsets.symmetric(horizontal: 10),
+              margin: const EdgeInsets.all(4),
+              padding: const EdgeInsets.symmetric(horizontal: 10),
               decoration: BoxDecoration(
-                color: currentCategory == data['name']
+                color: currentCategory == data.branchName
                     ? Colors.blue.shade900
                     : Colors.blue.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(20),
@@ -76,20 +73,18 @@ class _CategoryListState extends State<CategoryList> {
               child: Center(
                 child: Row(
                   children: [
-                    Image.asset(
-                      data['image'],
-                      
-                      width: 30,
-                      // color: currentCategory == data['name']
-                      //     ? Colors.white
-                      //     : Colors.blue.shade900,
-                    ),
-                    SizedBox(width: 10),
+                    if (data.iconUrl != null) ...[
+                      Image.network(
+                        data.iconUrl!,
+                        width: 30,
+                      ),
+                      const SizedBox(width: 10),
+                    ],
                     Text(
-                      data['name'],
+                      data.branchName ?? '',
                       style: TextStyle(
                         fontSize: 16,
-                        color: currentCategory == data['name']
+                        color: currentCategory == data.branchName
                             ? Colors.white
                             : Colors.blue.shade900,
                       ),

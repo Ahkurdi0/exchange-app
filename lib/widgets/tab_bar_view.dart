@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 
 class TypeTabBar extends StatelessWidget {
   const TypeTabBar(
-      {super.key, required this.category, required this.monthyear});
+      {super.key, required this.category, required this.monthYear});
   final String category;
-  final String monthyear;
+  final String monthYear;
 
   @override
   Widget build(BuildContext context) {
@@ -14,9 +14,9 @@ class TypeTabBar extends StatelessWidget {
       length: 2,
       child: Column(
         children: [
-          TabBar(tabs: [
+          const TabBar(tabs: [
             Tab(
-              text: 'Pendding',
+              text: 'Pending',
             ),
             Tab(
               text: 'Completed',
@@ -24,10 +24,10 @@ class TypeTabBar extends StatelessWidget {
           ]),
           Expanded(
             child: TabBarView(children: [
-              TranectionList(
-                  category: category, type: "pending", monthYear: monthyear),
-              TranectionList(
-                  category: category, type: "completed", monthYear: monthyear),
+              TransactionList(
+                  category: category, type: "pending", monthYear: monthYear),
+              TransactionList(
+                  category: category, type: "completed", monthYear: monthYear),
             ]),
           )
         ],

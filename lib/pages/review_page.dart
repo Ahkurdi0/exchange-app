@@ -1,73 +1,182 @@
+import 'dart:io';
+
+import 'package:exchnage_app/services/db.dart';
 import 'package:flutter/material.dart';
+import 'package:exchnage_app/models/TransactionModel.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart' as path;
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
-class ReviewSubmitPage extends StatefulWidget {
-  final Map<String, String> data;
+class ReviewPage extends StatefulWidget {
+  final TransactionModel transaction;
 
-  const ReviewSubmitPage({Key? key, required this.data}) : super(key: key);
+  const ReviewPage({super.key, required this.transaction});
 
   @override
-  _ReviewSubmitPageState createState() => _ReviewSubmitPageState();
+  State<ReviewPage> createState() => _ReviewPageState();
 }
 
-class _ReviewSubmitPageState extends State<ReviewSubmitPage> {
-  bool _isSubmitting = false;
+class _ReviewPageState extends State<ReviewPage> {
+  String? imagePath;
+  Db db = Db();
+  bool isLoading = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Review and Submit')),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            DataTable(
-              columns: const [
-                DataColumn(label: Text('Field')),
-                DataColumn(label: Text('Value')),
-              ],
-              rows: widget.data.entries.map((entry) => DataRow(
-                cells: [
-                  DataCell(Text(entry.key)),
-                  DataCell(Text(entry.value)),
-                ],
-              )).toList(),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: ElevatedButton(
-                onPressed: _isSubmitting ? null : () => _submitData(),
-                child: _isSubmitting
-                    ? CircularProgressIndicator()
-                    : Text('Submit to Database'),
+      appBar: AppBar(
+        title: const Text('Transaction'),
+      ),
+      body: ListView(
+        children: <Widget>[
+          ListTile(
+            title: const Text('Transaction ID'),
+            subtitle: Text(widget.transaction.uId ?? 'N/A'),
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: ListTile(
+                  title: const Text('To Branch'),
+                  subtitle:
+                      Text(widget.transaction.toBranch?.branchName ?? 'N/A'),
+                ),
               ),
-            ),
-          ],
+              Expanded(
+                child: ListTile(
+                  title: const Text('From Branch'),
+                  subtitle:
+                      Text(widget.transaction.fromBranch?.branchName ?? 'N/A'),
+                ),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: ListTile(
+                  title: const Text('Sending Amount'),
+                  subtitle: Text(
+                      widget.transaction.sendingAmount?.toString() ?? 'N/A'),
+                ),
+              ),
+              Expanded(
+                child: ListTile(
+                  title: const Text('Receiving Amount'),
+                  subtitle: Text(
+                      widget.transaction.receivingAmount?.toString() ?? 'N/A'),
+                ),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: ListTile(
+                  title: const Text('Total Commission'),
+                  subtitle: Text(
+                      widget.transaction.totalCommission?.toString() ?? 'N/A'),
+                ),
+              ),
+              Expanded(
+                child: ListTile(
+                  title: Text(
+                      'Your ${widget.transaction.toBranch?.branchName} Phone'),
+                  subtitle: Text(widget.transaction.toPhone ?? 'N/A'),
+                ),
+              ),
+            ],
+          ),
+          Column(
+            children: [
+              SizedBox(
+                height: 200,
+                child: ListTile(
+                  title: const Text('From Branch QR Code'),
+                  subtitle: widget.transaction.fromBranch?.qrCodeUrl != null ||
+                          (widget.transaction.fromBranch?.qrCodeUrl
+                                  ?.isNotEmpty ??
+                              false)
+                      ? Image.network(
+                          widget.transaction.fromBranch!.qrCodeUrl!,
+                        )
+                      : const Text('N/A'),
+                ),
+              ),
+              const SizedBox(
+                height: 15,
+              ),
+              if (imagePath != null)
+                Text(
+                  'Uploaded Image: ${path.basename(imagePath!)}',
+                ),
+              ElevatedButton.icon(
+                onPressed: () async {
+                  final picker = ImagePicker();
+                  final pickedFile =
+                      await picker.pickImage(source: ImageSource.gallery);
+                  if (pickedFile != null) {
+                    setState(() {
+                      imagePath = pickedFile.path;
+                    });
+                  }
+                },
+                icon: const Icon(Icons.upload_file),
+                label: const Text("Upload Transaction Document"),
+              ),
+            ],
+          ),
+        ],
+      ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.blue[800], // This is the background color
+          ),
+          onPressed: isLoading
+              ? null
+              : () async {
+                  // Add this line
+                  setState(() {
+                    isLoading = true; // Add this line
+                  });
+                  if (imagePath != null) {
+                    // Upload to Firebase Storage
+                    firebase_storage.Reference ref =
+                        firebase_storage.FirebaseStorage.instance.ref().child(
+                            'transactionDocuments/${path.basename(imagePath!)}');
+                    await ref.putFile(File(imagePath!));
+
+                    // Get download URL
+                    final String downloadURL = await ref.getDownloadURL();
+
+                    // Save download URL to Firestore
+                    db.addTransaction(
+                      widget.transaction
+                          .copyWith(transactionDocumentUrl: downloadURL),
+                    );
+                  } else {
+                    //show dialog
+                  }
+                  setState(() {
+                    isLoading = false; // Add this line
+                  });
+                },
+          icon: isLoading
+              ? const CircularProgressIndicator()
+              : const Icon(
+                  // Add this line
+                  Icons.payment,
+                  color: Colors.white,
+                ),
+          label: const Text(
+            "Submit",
+            style: TextStyle(color: Colors.white),
+          ),
         ),
       ),
     );
-  }
-
-  Future<void> _submitData() async {
-    setState(() {
-      _isSubmitting = true;
-    });
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      try {
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .collection('transactions')
-            .add(widget.data);
-
-        Navigator.pop(context); // Optionally pop the page after submitting
-      } catch (e) {
-        print('Error submitting data: $e');
-      }
-    }
-    setState(() {
-      _isSubmitting = false;
-    });
   }
 }
