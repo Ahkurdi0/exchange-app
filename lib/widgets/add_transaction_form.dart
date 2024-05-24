@@ -1,4 +1,5 @@
 import 'package:exchnage_app/models/BranchModel.dart';
+import 'package:exchnage_app/models/ExchangeRateModel.dart';
 import 'package:exchnage_app/services/db.dart';
 import 'package:exchnage_app/widgets/icons_list.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -30,52 +31,37 @@ class _AddTransactionFormState extends State<AddTransactionForm> {
   var sendEditControl = TextEditingController();
   var reciveEditControl = TextEditingController();
   var reciverInfoEditControl = TextEditingController();
-  var commission = 0;
-  var commissionType = 0.02;
+  double commission = 0;
+  double ownerCommission = 0.01;
   var uid = const Uuid();
   final db = Db();
   List<BranchModel> branches = [];
+  List<ExchangeRate> rates = [];
 
-  @override
-  void initState() {
-    super.initState();
+  void updateAmounts() async {
+    final amount = double.tryParse(sendEditControl.text) ?? 0;
+    commission = amount *
+        (ownerCommission +
+            (categoryOne?.commissionAmount ?? 0) +
+            (categoryTwo?.commissionAmount ?? 0));
 
-    db.getBranches().then((value) => setState(() => branches = value));
-    sendEditControl.addListener(() {
-      if (sendEditControl.text.isNotEmpty) {
-        try {
-          final amount = int.parse(sendEditControl.text);
-          final amount2 = int.parse(sendEditControl.text);
-          commission = (amount * commissionType)
-              .toInt(); // Calculate 2% and convert to integer
-
-          reciveEditControl.text = (amount2 - commission)
-              .toString(); // Update 'reciveEditControl' without decimals
-        } catch (e) {
-          reciveEditControl.text = 'Error';
-        }
-      } else {
-        reciveEditControl.text =
-            ''; // Clear 'reciveEditControl' if 'sendEditControl' is empty
-      }
-    });
-    updateCategory();
+    // check if the currency of cat one and cat two were different
+    double exchangeRate = 1.0;
+    if (categoryOne?.currency != categoryTwo?.currency) {
+      ExchangeRate rate = rates.firstWhere(
+        (rate) =>
+            rate.fromCurrency == categoryOne?.currency &&
+            rate.toCurrency == categoryTwo?.currency,
+        orElse: () => const ExchangeRate(rate: 1.0),
+      );
+      exchangeRate = rate.rate ?? 1.0;
+    }
+    reciveEditControl.text = ((amount * exchangeRate)).toString();
   }
 
-  void updateCategory() {
-    setState(() {
-      selectedCategory = AppIcons().homeExchangeCategories.firstWhere(
-            (cat) => cat['name'] == categoryOne,
-            orElse: () => {
-              'image': 'assets/images/default.png',
-              'qrcode': 'assets/qr/default_qr.png'
-            },
-          );
-    });
-  }
-
+//  submit the data
   Future<void> _submitForm() async {
-    int sendAmount = int.tryParse(sendEditControl.text) ?? 0;
+    double sendAmount = double.tryParse(sendEditControl.text) ?? 0;
     if (sendEditControl.text.isEmpty ||
         reciveEditControl.text.isEmpty ||
         reciverInfoEditControl.text.isEmpty ||
@@ -194,11 +180,16 @@ class _AddTransactionFormState extends State<AddTransactionForm> {
       sendEditControl.clear();
       reciveEditControl.clear();
       reciverInfoEditControl.clear();
-      // categoryOne = 'Fib';
-      // categoryTwo = 'Fib';
-      updateCategory();
       isLoader = false;
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    db.getBranches().then((value) => setState(() => branches = value));
+    db.getExchangeRates().then((value) => rates = value);
   }
 
   @override
@@ -218,52 +209,36 @@ class _AddTransactionFormState extends State<AddTransactionForm> {
                   const Text('You Send', style: TextStyle(fontSize: 22)),
                   const SizedBox(height: 6),
                   CategoryDropDown(
-                    branches: branches
-                        .where((branch) =>
-                            categoryTwo == null ||
-                            branch.uId != categoryTwo!.uId)
-                        .toList(),
-                    branch: categoryOne,
-                    onChanged: (BranchModel? value) {
-                      if (value != null) {
-                        if (categoryTwo != null &&
-                            value.uId == categoryTwo!.uId) {
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: const Text('Invalid Selection'),
-                              content: const Text(
-                                  'Category One and Category Two cannot be the same.'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.of(context).pop(),
-                                  child: const Text('OK'),
-                                ),
-                              ],
-                            ),
-                          );
-                        } else {
-                          setState(() {
-                            categoryOne = value;
-                            updateCategory();
-                          });
-                        }
-                      }
-                    },
-                  ),
+                      branches: branches
+                          .where((branch) =>
+                              categoryTwo == null ||
+                              branch.uId != categoryTwo!.uId)
+                          .toList(),
+                      branch: categoryOne,
+                      onChanged: (BranchModel? value) {
+                        setState(() {
+                          categoryOne = value;
+                          updateAmounts();
+                        });
+                      }),
                   const SizedBox(height: 16),
                   const Text('Send the amount', style: TextStyle(fontSize: 22)),
                   TextFormField(
                     controller: sendEditControl,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
-                        hintText: '0',
-                        suffix: Text(categoryOne?.currency ?? 'IQD')),
+                      hintText: '0',
+                      suffix: Text(categoryOne?.currency ?? 'IQD'),
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        updateAmounts();
+                      });
+                    },
                   ),
                   const Text('Minimum amount: 30,000 Maximum : 3,000,000',
                       style: TextStyle(fontSize: 14, color: Colors.red)),
                   const SizedBox(height: 16),
-
                   const Text('You Get', style: TextStyle(fontSize: 22)),
                   CategoryDropDown(
                     branches: branches
@@ -273,33 +248,12 @@ class _AddTransactionFormState extends State<AddTransactionForm> {
                         .toList(),
                     branch: categoryTwo,
                     onChanged: (BranchModel? value) {
-                      if (value != null) {
-                        if (categoryOne != null &&
-                            value.uId == categoryOne!.uId) {
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: const Text('Invalid Selection'),
-                              content: const Text(
-                                  'Category One and Category Two cannot be the same.'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.of(context).pop(),
-                                  child: const Text('OK'),
-                                ),
-                              ],
-                            ),
-                          );
-                        } else {
-                          setState(() {
-                            categoryTwo = value;
-                            updateCategory();
-                          });
-                        }
-                      }
+                      setState(() {
+                        categoryTwo = value;
+                        updateAmounts();
+                      });
                     },
                   ),
-
                   const SizedBox(height: 16),
                   const Text('Get the amount', style: TextStyle(fontSize: 22)),
                   TextFormField(
@@ -307,58 +261,55 @@ class _AddTransactionFormState extends State<AddTransactionForm> {
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                       hintText: '0',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(
-                            color: Color.fromARGB(255, 214, 214, 214),
-                            width: 1.0),
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide:
-                            const BorderSide(color: Colors.blue, width: 2.0),
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      fillColor: Colors.white,
-                      filled: true,
-                      hintStyle: const TextStyle(color: Colors.grey),
-                      contentPadding: const EdgeInsets.all(10),
+                      suffix: Text(categoryTwo?.currency ?? 'IQD'),
                     ),
+                    onChanged: (value) {
+                      setState(() {
+                        updateAmounts();
+                      });
+                    },
                   ),
-                  Text('Commission: $commission',
+                  Text('Commission: ${commission.toStringAsFixed(2)}',
                       style: const TextStyle(fontSize: 14, color: Colors.red)),
-                  // const SizedBox(height: 16),
-                  // Text('Your $categoryTwo number',
+                  const SizedBox(height: 16),
+                  // Text('Your ${categoryTwo?.branchName ?? ''} number',
                   //     style: const TextStyle(fontSize: 22)),
                   // TextFormField(
                   //   controller: reciverInfoEditControl,
                   //   keyboardType: TextInputType.number,
-                  //   decoration:
-                  //       InputDecoration(hintText: 'Your $categoryTwo number'),
+                  //   decoration: InputDecoration(
+                  //       hintText:
+                  //           'Your ${categoryTwo?.branchName ?? ''} number'),
                   // ),
                   // const SizedBox(height: 16),
                   Center(
                     child: ElevatedButton(
                       onPressed: () {
-                        // if (!isLoader) {
-                        //   _submitForm();
-                        // }
+                        if (!isLoader) {
+                          _submitForm();
+                        }
 
-                        BranchModel branchModel = BranchModel(
-                            api: "https:v1/api",
-                            branchName: "Zain Cash",
-                            commissionAmount: 0.15,
-                            hasApi: true,
-                            iconUrl:
-                                "https://firebasestorage.googleapis.com/v0/b/exchnage-wallet-kurd.appspot.com/o/icons%2Fzaincash.png?alt=media&token=b721565b-8141-4b37-b221-1e50c530261a",
-                            phoneNumber: "",
-                            qrCodeUrl: "",
-                            qrCodeValue: "",
-                            uId: uid.v4());
+                        // ExchangeRate exchangeRate = ExchangeRate(
+                        //   uId: uid.v4(),
+                        //   fromCurrency: "USDT",
+                        //   rate: 0.0055,
+                        //   toCurrency: "YEN",
+                        // );
+                        // db.addExchangeRate(exchangeRate);
 
-                        Db().addBranch(branchModel);
+                        // BranchModel branchModel = BranchModel(
+                        //     api: "https:v1/api",
+                        //     branchName: "Zain Cash",
+                        //     commissionAmount: 0.15,
+                        //     hasApi: true,
+                        //     iconUrl:
+                        //         "https://firebasestorage.googleapis.com/v0/b/exchnage-wallet-kurd.appspot.com/o/icons%2Fzaincash.png?alt=media&token=b721565b-8141-4b37-b221-1e50c530261a",
+                        //     phoneNumber: "",
+                        //     qrCodeUrl: "",
+                        //     qrCodeValue: "",
+                        //     uId: uid.v4());
+
+                        // Db().addBranch(branchModel);
                       },
                       child: isLoader
                           ? const CircularProgressIndicator()

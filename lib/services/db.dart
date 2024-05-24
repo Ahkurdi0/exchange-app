@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:exchnage_app/models/BranchModel.dart';
+import 'package:exchnage_app/models/ExchangeRateModel.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class Db {
+  final firestore = FirebaseFirestore.instance;
   final CollectionReference users =
       FirebaseFirestore.instance.collection('users');
 
@@ -39,15 +41,28 @@ class Db {
   }
 
   Future<List<BranchModel>> getBranches() async {
-    final CollectionReference branches =
-        FirebaseFirestore.instance.collection('branches');
+    final CollectionReference branches = firestore.collection('branches');
     final QuerySnapshot snapshot = await branches.get();
     return snapshot.docs.map((doc) => BranchModel.fromSnap(doc)).toList();
   }
 
   Future<void> addBranch(BranchModel branch) async {
-    final CollectionReference branches =
-        FirebaseFirestore.instance.collection('branches');
+    final CollectionReference branches = firestore.collection('branches');
     await branches.doc(branch.uId).set(branch.toMap());
+  }
+
+// add new exchange rate
+  void addExchangeRate(ExchangeRate exchangeRate) async {
+    await firestore
+        .collection('exchangeRates')
+        .doc(exchangeRate.uId)
+        .set(exchangeRate.toMap());
+  }
+
+  Future<List<ExchangeRate>> getExchangeRates() async {
+    final CollectionReference exchangeRates =
+        firestore.collection('exchangeRates');
+    final QuerySnapshot snapshot = await exchangeRates.get();
+    return snapshot.docs.map((doc) => ExchangeRate.fromSnap(doc)).toList();
   }
 }
