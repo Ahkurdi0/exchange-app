@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:exchnage_app/models/UserModel.dart';
 import 'package:exchnage_app/services/db.dart';
 import 'package:flutter/material.dart';
 import 'package:exchnage_app/models/TransactionModel.dart';
@@ -21,6 +22,13 @@ class _ReviewPageState extends State<ReviewPage> {
   String? imagePath;
   Db db = Db();
   bool isLoading = false;
+  UserModel? currentUserData;
+
+  @override
+  void initState() {
+    db.getCurrentUserData().then((value) => currentUserData = value);
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -142,7 +150,7 @@ class _ReviewPageState extends State<ReviewPage> {
                   setState(() {
                     isLoading = true; // Add this line
                   });
-                  if (imagePath != null) {
+                  if (imagePath != null && currentUserData?.uId != null) {
                     // Upload to Firebase Storage
                     firebase_storage.Reference ref =
                         firebase_storage.FirebaseStorage.instance.ref().child(
@@ -154,11 +162,12 @@ class _ReviewPageState extends State<ReviewPage> {
 
                     // Save download URL to Firestore
                     db.addTransaction(
-                      widget.transaction
-                          .copyWith(transactionDocumentUrl: downloadURL),
+                      widget.transaction.copyWith(
+                          transactionDocumentUrl: downloadURL,
+                          user: currentUserData),
                     );
                   } else {
-                    //show dialog
+                    print(currentUserData.toString());
                   }
                   setState(() {
                     isLoading = false; // Add this line

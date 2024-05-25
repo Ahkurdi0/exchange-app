@@ -2,9 +2,11 @@ import 'dart:ffi';
 import 'dart:ui';
 
 // import 'package:exchnage_app/pages/dashbord.dart';
+import 'package:exchnage_app/models/UserModel.dart';
 import 'package:exchnage_app/pages/login.dart';
 import 'package:exchnage_app/services/auth_service.dart';
 import 'package:exchnage_app/utils/appvalidator.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -37,19 +39,13 @@ class _SignUpState extends State<SignUp> {
         isLoader = true;
       });
 
-      var data = {
-        'firstname': _firstNameController.text,
-        'lastname': _lastNameController.text,
-        'email': _emailController.text,
-        'phone': _phoneController.text,
-        'password': _passwordController.text,
-        'remainingAmount': 0,
-        'totalCredit': 0,
-        'totalDebit': 0,
-      };
-
-      // bool success = await authService.createUser(data, context);
-      await authService.createUser(data, context);
+      UserModel user = UserModel(
+          email: _emailController.text,
+          firstName: _firstNameController.text,
+          lastName: _lastNameController.text,
+          password: _passwordController.value.text,
+          phone: _phoneController.value.text);
+      await authService.createUser(user, context);
 
       setState(() {
         isLoader = false;

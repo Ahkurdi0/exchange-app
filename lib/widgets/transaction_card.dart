@@ -1,4 +1,5 @@
 import 'package:exchnage_app/models/TransactionModel.dart';
+import 'package:exchnage_app/pages/detail_page.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
@@ -22,13 +23,12 @@ class TransactionCard extends StatelessWidget {
         child: InkWell(
           onTap: () {
             // Define the action when the card is clicked
-            // Navigator.push(
-            //   context,
-            //   MaterialPageRoute(
-            //     builder: (context) => DetailsPage(
-            //         transaction: transaction), // Navigate to the details page
-            //   ),
-            // );
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => DetailsPage(transaction: transaction),
+              ),
+            );
           },
           borderRadius: BorderRadius.circular(20),
           highlightColor:

@@ -1,10 +1,11 @@
+import 'package:exchnage_app/models/BranchModel.dart';
 import 'package:exchnage_app/widgets/transaction_list.dart';
 import 'package:flutter/material.dart';
 
 class TypeTabBar extends StatelessWidget {
   const TypeTabBar(
       {super.key, required this.category, required this.monthYear});
-  final String category;
+  final BranchModel category;
   final String monthYear;
 
   @override

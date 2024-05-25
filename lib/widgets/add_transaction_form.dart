@@ -1,6 +1,7 @@
 import 'package:exchnage_app/models/BranchModel.dart';
 import 'package:exchnage_app/models/ExchangeRateModel.dart';
 import 'package:exchnage_app/models/TransactionModel.dart';
+import 'package:exchnage_app/models/UserModel.dart';
 import 'package:exchnage_app/pages/review_page.dart';
 import 'package:exchnage_app/services/db.dart';
 import 'package:exchnage_app/utils/appvalidator.dart';
