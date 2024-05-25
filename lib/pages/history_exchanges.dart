@@ -1,3 +1,4 @@
+import 'package:exchnage_app/models/BranchModel.dart';
 import 'package:exchnage_app/widgets/category_list.dart';
 import 'package:exchnage_app/widgets/tab_bar_view.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +12,7 @@ class HistoryTranaction extends StatefulWidget {
 }
 
 class _HistoryTransactionState extends State<HistoryTranaction> {
-  String category = 'All';
+  BranchModel category = const BranchModel(branchName: 'All');
   String monthYear = '';
 
   @override
@@ -39,7 +40,7 @@ class _HistoryTransactionState extends State<HistoryTranaction> {
           //   },
           // ),
           CategoryList(
-            onChanged: (String? value) {
+            onChanged: (BranchModel? value) {
               if (value != null) {
                 setState(() {
                   category = value; // Update category based on user selection

@@ -1,7 +1,7 @@
 import 'package:exchnage_app/pages/login.dart';
 import 'package:exchnage_app/widgets/add_transaction_form.dart';
 import 'package:exchnage_app/widgets/hero_card.dart';
-import 'package:exchnage_app/widgets/transactions_card.dart';
+import 'package:exchnage_app/widgets/transactions_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 // ignore_for_file: prefer_const_constructors

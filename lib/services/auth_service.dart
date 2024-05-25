@@ -1,3 +1,4 @@
+import 'package:exchnage_app/models/UserModel.dart';
 import 'package:exchnage_app/pages/dashbord.dart';
 import 'package:exchnage_app/services/db.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -5,13 +6,14 @@ import 'package:flutter/material.dart';
 
 class AuthService {
   var db = Db();
-  Future<bool> createUser(data, BuildContext context) async {
+  Future<bool> createUser(UserModel userModel, BuildContext context) async {
     try {
       await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: data['email'],
-        password: data['password'],
+        email: userModel.email ?? '',
+        password: userModel.password ?? '',
       );
-      await db.addUser(data, context);
+
+      await db.addUser(userModel, context);
       Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -31,7 +33,7 @@ class AuthService {
       return false;
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
             content:
                 Text('An unexpected error occurred. Please try again later.')),
       );
@@ -75,7 +77,7 @@ class AuthService {
       return false;
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
             content:
                 Text('An unexpected error occurred. Please try again later.')),
       );

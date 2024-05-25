@@ -1,11 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:exchnage_app/models/BranchModel.dart';
+import 'package:exchnage_app/models/UserModel.dart';
 import 'package:flutter/material.dart';
 
 @immutable
 class TransactionModel extends Equatable {
   final String? uId;
+  final UserModel? user;
   final BranchModel? fromBranch;
   final BranchModel? toBranch;
   final double? sendingAmount;
@@ -19,6 +21,7 @@ class TransactionModel extends Equatable {
 
   const TransactionModel({
     this.uId,
+    this.user,
     this.fromBranch,
     this.toBranch,
     this.sendingAmount,
@@ -33,6 +36,7 @@ class TransactionModel extends Equatable {
 
   TransactionModel copyWith({
     String? uId,
+    UserModel? user,
     BranchModel? fromBranch,
     BranchModel? toBranch,
     double? sendingAmount,
@@ -46,6 +50,7 @@ class TransactionModel extends Equatable {
   }) {
     return TransactionModel(
       uId: uId ?? this.uId,
+      user: user ?? this.user,
       fromBranch: fromBranch ?? this.fromBranch,
       toBranch: toBranch ?? this.toBranch,
       sendingAmount: sendingAmount ?? this.sendingAmount,
@@ -63,6 +68,7 @@ class TransactionModel extends Equatable {
   Map<String, dynamic> toMap() {
     return {
       'uId': uId,
+      'user': user?.toMap(),
       'fromBranch': fromBranch?.toMap(),
       'toBranch': toBranch?.toMap(),
       'sendingAmount': sendingAmount,
@@ -83,6 +89,9 @@ class TransactionModel extends Equatable {
   factory TransactionModel.fromMap(Map<String, dynamic> map) {
     return TransactionModel(
       uId: map['uId'],
+      user: map['user'] != null
+          ? UserModel.fromMap(map['user'] as Map<String, dynamic>)
+          : null,
       fromBranch: map['fromBranch'] != null
           ? BranchModel.fromMap(map['fromBranch'] as Map<String, dynamic>)
           : null,
@@ -107,6 +116,7 @@ class TransactionModel extends Equatable {
   @override
   List<Object?> get props => [
         uId,
+        user,
         fromBranch,
         toBranch,
         sendingAmount,

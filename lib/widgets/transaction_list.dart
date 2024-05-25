@@ -1,3 +1,4 @@
+import 'package:exchnage_app/models/BranchModel.dart';
 import 'package:exchnage_app/models/TransactionModel.dart';
 import 'package:exchnage_app/services/db.dart';
 import 'package:exchnage_app/widgets/transaction_card.dart';
@@ -11,7 +12,7 @@ class TransactionList extends StatefulWidget {
       required this.type,
       required this.monthYear});
 
-  final String category;
+  final BranchModel category;
   final String type;
   final String monthYear;
 
@@ -33,7 +34,7 @@ class _TransactionListState extends State<TransactionList> {
   Widget build(BuildContext context) {
     return FutureBuilder<List<TransactionModel>>(
       future: db.getUserTransactionsForMonth(
-          parseMonthYear(widget.monthYear), widget.type),
+          parseMonthYear(widget.monthYear), widget.type, widget.category),
       builder: (BuildContext context,
           AsyncSnapshot<List<TransactionModel>> snapshot) {
         if (snapshot.hasError) {

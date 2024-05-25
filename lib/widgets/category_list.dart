@@ -3,7 +3,7 @@ import 'package:exchnage_app/services/db.dart';
 import 'package:flutter/material.dart';
 
 class CategoryList extends StatefulWidget {
-  final ValueChanged<String?> onChanged;
+  final ValueChanged<BranchModel?> onChanged;
 
   const CategoryList({super.key, required this.onChanged});
 
@@ -56,7 +56,7 @@ class _CategoryListState extends State<CategoryList> {
               if (currentCategory != data.branchName) {
                 setState(() {
                   currentCategory = data.branchName ?? '';
-                  widget.onChanged(data.branchName);
+                  widget.onChanged(data);
                 });
                 scrollToSelectedCategory();
               }

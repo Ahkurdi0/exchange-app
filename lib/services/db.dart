@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:exchnage_app/models/BranchModel.dart';
 import 'package:exchnage_app/models/ExchangeRateModel.dart';
 import 'package:exchnage_app/models/TransactionModel.dart';
+import 'package:exchnage_app/models/UserModel.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -11,7 +12,8 @@ class Db {
       FirebaseFirestore.instance.collection('users');
   var currentUser = FirebaseAuth.instance.currentUser;
 
-  Future<void> addUser(Map<String, dynamic> data, BuildContext context) async {
+  Future<void> addUser(UserModel userModel, BuildContext context) async {
+    currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser == null) {
       print('No user logged in');
       showDialog(
@@ -27,7 +29,9 @@ class Db {
     }
 
     try {
-      await users.doc(currentUser?.uid).set(data);
+      await users
+          .doc(currentUser?.uid)
+          .set(userModel.copyWith(uId: currentUser?.uid).toMap());
     } catch (e) {
       showDialog(
         context: context,
@@ -73,7 +77,11 @@ class Db {
         .doc(currentUser?.uid)
         .collection('transactions')
         .doc(transaction.uId)
-        .set(transaction.toMap());
+        .set({
+      ...transaction.toMap(),
+      'fromBranchId': transaction.fromBranch?.uId,
+      'toBranchId': transaction.toBranch?.uId,
+    });
   }
 
   Future<List<TransactionModel>> getUserTransactionsForMonth(
@@ -86,13 +94,25 @@ class Db {
         .where('status', isEqualTo: status)
         .orderBy('createdAt', descending: true);
 
-    if (category != null && category != 'All') {
-      query = query
-          .where('fromBranch', isEqualTo: category)
-          .where('toBranch', isEqualTo: category);
+    if (category != null && category.branchName != 'All') {
+      // get the transactions by from branch
+      query = query.where('fromBranchId', isEqualTo: category.uId);
     }
 
     final QuerySnapshot snapshot = await query.get();
     return snapshot.docs.map((doc) => TransactionModel.fromSnap(doc)).toList();
+  }
+
+  Future<UserModel?> getCurrentUserData() async {
+    final DocumentReference userRef =
+        firestore.collection('users').doc(currentUser?.uid);
+    final DocumentSnapshot snapshot = await userRef.get();
+
+    if (snapshot.exists) {
+      return UserModel.fromSnap(snapshot);
+    } else {
+      print('User document does not exist');
+      return null;
+    }
   }
 }
