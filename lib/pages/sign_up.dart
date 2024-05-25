@@ -95,14 +95,14 @@ class _SignUpState extends State<SignUp> {
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     decoration:
                         _buildInputDecoration('First Name', Icons.person),
-                    validator: appValidator.validateUserName),
+                    validator: appValidator.validateFirstName),
                 const SizedBox(height: 16),
                 TextFormField(
                     controller: _lastNameController,
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     decoration:
                         _buildInputDecoration('Last Name', Icons.person),
-                    validator: appValidator.validateUserName),
+                    validator: appValidator.validateLastName),
                 const SizedBox(height: 16),
                 TextFormField(
                     controller: _emailController,
@@ -112,16 +112,28 @@ class _SignUpState extends State<SignUp> {
                     validator: appValidator.validateEmail),
                 const SizedBox(height: 16),
                 TextFormField(
-                    controller: _phoneController,
-                    keyboardType: TextInputType.phone,
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                    decoration:
-                        _buildInputDecoration('Phone Number', Icons.phone),
-                    validator: (value) =>
-                        appValidator.phoneNumberValidator(value)),
+                  controller: _phoneController,
+                  keyboardType: TextInputType.phone,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  decoration: _buildInputDecoration(
+                    'Phone Number',
+                    Icons.phone,
+                    prefixText: '07'
+                  ),
+                  validator: (value) {
+                    RegExp regExp = RegExp(r'^[0-9]{9}$');
+                    if (value?.isEmpty ?? true) {
+                      return "Please enter phone number! 07********";
+                    } else if (!regExp.hasMatch(value!)) {
+                      return "Please enter 9 digits for your phone number!";
+                    }
+                    return null;
+                  },
+                ),
                 const SizedBox(height: 16),
                 TextFormField(
                     controller: _passwordController,
+                    obscureText: true,
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     decoration: _buildInputDecoration('Password', Icons.lock),
                     validator: appValidator.validatePassword),
@@ -133,15 +145,15 @@ class _SignUpState extends State<SignUp> {
                     onPressed: () {
                       isLoader ? print("Loading") : _submitForm();
                     },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF0B59D7),
+                    ),
                     child: isLoader
                         ? const Center(child: CircularProgressIndicator())
                         : const Text(
                             'Create Account',
                             style: TextStyle(color: Colors.white, fontSize: 20),
                           ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0B59D7),
-                    ),
                   ),
                 ),
                 const SizedBox(
@@ -167,8 +179,10 @@ class _SignUpState extends State<SignUp> {
     );
   }
 
-  InputDecoration _buildInputDecoration(String labelText, IconData suffixIcon) {
+  InputDecoration _buildInputDecoration(String labelText, IconData suffixIcon,
+      {String? prefixText}) {
     return InputDecoration(
+      prefixText: prefixText,
       fillColor: Colors.white, // Set the fill color to white
       filled: true, // Enable the fillColor to take effect
       labelText: labelText,
