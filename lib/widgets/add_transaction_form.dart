@@ -44,11 +44,11 @@ class _AddTransactionFormState extends State<AddTransactionForm> {
 
   void updateAmounts() async {
     final amount = double.tryParse(sendEditControl.text) ?? 0;
-    commission = amount *
-        (ownerCommission +
-            (categoryOne?.commissionAmount ?? 0) +
-            (categoryTwo?.commissionAmount ?? 0));
+    final commissionOne = categoryOne?.commissionAmount ?? 0;
+    final commissionTwo = categoryTwo?.commissionAmount ?? 0;
+    // commission = amount * (ownerCommission + commissionOne + commissionTwo);
 
+    print("<><<<<<<<<>" + commission.toString());
     // check if the currency of cat one and cat two were different
     double exchangeRate = 1.0;
     if (categoryOne?.currency != categoryTwo?.currency) {
@@ -60,6 +60,10 @@ class _AddTransactionFormState extends State<AddTransactionForm> {
       );
       exchangeRate = rate.rate ?? 1.0;
     }
+
+    commission = (amount * exchangeRate) *
+        (ownerCommission + commissionOne + commissionTwo);
+
     reciveEditControl.text = ((amount * exchangeRate) - commission).toString();
   }
 
@@ -352,31 +356,31 @@ class _AddTransactionFormState extends State<AddTransactionForm> {
                   Center(
                     child: ElevatedButton(
                       onPressed: () {
-                        if (!isLoader) {
-                          navigateToReviewPage();
-                        }
+                        // if (!isLoader) {
+                        //   navigateToReviewPage();
+                        // }
 
-                        // ExchangeRate exchangeRate = ExchangeRate(
-                        //   uId: uid.v4(),
-                        //   fromCurrency: "USDT",
-                        //   rate: 0.0055,
-                        //   toCurrency: "YEN",
-                        // );
-                        // db.addExchangeRate(exchangeRate);
+                        ExchangeRate exchangeRate = ExchangeRate(
+                          uId: uid.v4(),
+                          fromCurrency: "IQD",
+                          rate: 0.00076,
+                          toCurrency: "USD",
+                        );
+                        db.addExchangeRate(exchangeRate);
 
-                        // BranchModel branchModel = BranchModel(
-                        //     api: "https:v1/api",
-                        //     branchName: "Zain Cash",
-                        //     commissionAmount: 0.15,
-                        //     hasApi: true,
-                        //     iconUrl:
-                        //         "https://firebasestorage.googleapis.com/v0/b/exchnage-wallet-kurd.appspot.com/o/icons%2Fzaincash.png?alt=media&token=b721565b-8141-4b37-b221-1e50c530261a",
-                        //     phoneNumber: "",
-                        //     qrCodeUrl: "",
-                        //     qrCodeValue: "",
-                        //     uId: uid.v4());
+                        //   BranchModel branchModel = BranchModel(
+                        //       api: "https:v1/api",
+                        //       branchName: "ZainCash",
+                        //       commissionAmount: 0.04,
+                        //       currency: "USD",
+                        //       hasApi: false,
+                        //       iconUrl:"https://firebasestorage.googleapis.com/v0/b/exchnage-wallet-kurd.appspot.com/o/icons%2Fqiservice.png?alt=media&token=ef046146-8186-4c53-a15d-5efcf00d907c",
+                        //       phoneNumber: "",
+                        //       qrCodeUrl: "https://firebasestorage.googleapis.com/v0/b/exchnage-wallet-kurd.appspot.com/o/qr%2Ffib_qr.png?alt=media&token=f6bd698c-03a4-47c6-a04f-4417b62c8756",
+                        //       qrCodeValue: "",
+                        //       uId: uid.v4());
 
-                        // Db().addBranch(branchModel);
+                        //   Db().addBranch(branchModel);
                       },
                       child: isLoader
                           ? const CircularProgressIndicator()

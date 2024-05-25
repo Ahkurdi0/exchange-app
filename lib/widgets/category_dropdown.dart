@@ -23,7 +23,7 @@ class _CategoryDropDownState extends State<CategoryDropDown> {
     return DropdownButton<BranchModel>(
       value: widget.branch,
       isExpanded: true,
-      hint: const Text('Select Category'),
+      hint: const Text('Select Branch'),
       items: widget.branches.map((branch) {
         return DropdownMenuItem<BranchModel>(
           value: branch, // Changed to BranchModel
