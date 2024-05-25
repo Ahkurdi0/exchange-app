@@ -46,6 +46,9 @@ dependencies:
   vibration: ^1.8.4
   equatable: ^2.0.5
   image_picker: ^1.1.1
+  cloud_functions: ^4.7.5
+  firebase_messaging: ^14.9.3
+  flutter_local_notifications: ^17.1.2
 
 dev_dependencies:
   flutter_test:
