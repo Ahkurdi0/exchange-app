@@ -33,6 +33,7 @@ class AppValidator {
     }
     return null;
   }
+
   String? validatePassword(value) {
     if (value.isEmpty) {
       return 'Please enter your password';
@@ -43,7 +44,7 @@ class AppValidator {
 
   String? isEmptyCheak(value) {
     if (value == null || value.isEmpty) {
-      return 'Please enter an amount';
+      return '';
     }
     if (double.tryParse(value) == null) {
       return 'Please enter a valid number';

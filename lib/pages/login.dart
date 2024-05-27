@@ -1,15 +1,11 @@
-import 'dart:ffi';
-import 'dart:ui';
-import 'package:exchnage_app/pages/dashbord.dart';
 import 'package:exchnage_app/pages/forget_password.dart';
 import 'package:exchnage_app/pages/sign_up.dart';
 import 'package:exchnage_app/services/auth_service.dart';
 import 'package:exchnage_app/utils/appvalidator.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class LoginScreen extends StatefulWidget {
-  LoginScreen({super.key});
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -50,7 +46,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFEBF5FF),
+      backgroundColor: const Color(0xFFEBF5FF),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -58,20 +54,23 @@ class _LoginScreenState extends State<LoginScreen> {
           child: SingleChildScrollView(
             child: Column(
               children: [
-                SizedBox(
-                  height: 50,
+                const SizedBox(
                 ),
-                SizedBox(height: 16),
-                Text(
-                  'Login Account',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 28,
-                    color: Color(0xFF0B59D7),
-                  ),
-                  textAlign: TextAlign.center,
+                Image.asset('assets/signin.png', height: 350, width: 350),
+                const Row(
+                  children: [
+                    Text(
+                      'Welcome !',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w400,
+                        fontSize: 28,
+                        color: Color(0xFF0B59D7),
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 16,
                 ),
                 TextFormField(
@@ -80,22 +79,24 @@ class _LoginScreenState extends State<LoginScreen> {
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     decoration: _buildInputDecoration('Email', Icons.email),
                     validator: appValidator.validateEmail),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 TextFormField(
-                    controller: _passwordController,
-                    keyboardType: TextInputType.phone,
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                    decoration: _buildInputDecoration('Pssword', Icons.lock),
-                    validator: appValidator.validatePassword),
-                SizedBox(height: 20),
+                  controller: _passwordController,
+                  keyboardType: TextInputType.phone,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  decoration: _buildInputDecoration('Password', Icons.lock),
+                  validator: appValidator.validatePassword,
+                  obscureText: true,
+                ),
+                const SizedBox(height: 20),
                 Row(
                   children: [
                     TextButton(onPressed: (){
                       Navigator.push(context, MaterialPageRoute(builder: (context) => ForgetPasswordPage()));
-                    }, child: Text('Forget Password?'))
+                    }, child: const Text('Forget Password?',style: TextStyle(fontSize: 16),))
                   ],
                 ),
-                SizedBox(height:10,),
+                const SizedBox(height:10,),
                 SizedBox(
                   height: 50,
                   width: double.infinity,
@@ -103,18 +104,18 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: () {
                       isLoader ? print("Loading") : _submitForm();
                     },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF0B59D7),
+                    ),
                     child: isLoader
-                        ? Center(child: CircularProgressIndicator())
-                        : Text(
+                        ? const Center(child: CircularProgressIndicator())
+                        : const Text(
                             'Login',
                             style: TextStyle(color: Colors.white, fontSize: 20),
                           ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF0B59D7),
-                    ),
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 20,
                 ),
                 TextButton(
@@ -141,9 +142,9 @@ class _LoginScreenState extends State<LoginScreen> {
     return InputDecoration(
       fillColor: Colors.white, // Set the fill color to white
       filled: true, // Enable the fillColor to take effect
-      suffixIcon: Icon(suffixIcon, color: Color(0xFF0B59D7)),
+      suffixIcon: Icon(suffixIcon, color: const Color(0xFF0B59D7)),
       labelText: labelText,
-      labelStyle: TextStyle(color: Color.fromARGB(255, 94, 94, 94)),
+      labelStyle: const TextStyle(color: Color.fromARGB(255, 94, 94, 94)),
       // Icon color remains the same
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(15),

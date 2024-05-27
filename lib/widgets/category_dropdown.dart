@@ -20,36 +20,46 @@ class CategoryDropDown extends StatefulWidget {
 class _CategoryDropDownState extends State<CategoryDropDown> {
   @override
   Widget build(BuildContext context) {
-    return DropdownButton<BranchModel>(
-      value: widget.branch,
-      isExpanded: true,
-      hint: const Text('Select Branch'),
-      items: widget.branches.map((branch) {
-        return DropdownMenuItem<BranchModel>(
-          value: branch, // Changed to BranchModel
-          child: Row(
-            children: [
-              Image.network(
-                branch.iconUrl ?? '', // Using network images
-                width: 30,
-                height: 30,
-                fit: BoxFit.cover,
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.blue, width: 2),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<BranchModel>(
+          value: widget.branch,
+          isExpanded: true,
+          hint: const Text('Select Branch'),
+          items: widget.branches.map((branch) {
+            return DropdownMenuItem<BranchModel>(
+              value: branch,
+              child: Row(
+                children: [
+                  Image.network(
+                    branch.iconUrl ?? '',
+                    width: 30,
+                    height: 30,
+                    fit: BoxFit.cover,
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    branch.branchName ?? '',
+                    style: const TextStyle(color: Colors.black),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    ' - ${branch.currency}',
+                    style: const TextStyle(color: Colors.black),
+                  ),
+                ],
               ),
-              const SizedBox(width: 10),
-              Text(
-                branch.branchName ?? '',
-                style: const TextStyle(color: Colors.black),
-              ),
-              const SizedBox(width: 10),
-              Text(
-                ' - ${branch.currency}',
-                style: const TextStyle(color: Colors.black),
-              ),
-            ],
-          ),
-        );
-      }).toList(),
-      onChanged: widget.onChanged, // Changed to accept BranchModel
+            );
+          }).toList(),
+          onChanged: widget.onChanged,
+        ),
+      ),
     );
   }
 }

@@ -1,9 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:exchnage_app/widgets/add_transaction_form.dart';
 import 'package:flutter/material.dart';
 
 class HeroCard extends StatelessWidget {
-  HeroCard({
+  const HeroCard({
     super.key,
     required this.userId,
   });
@@ -20,11 +19,11 @@ class HeroCard extends StatelessWidget {
       builder:
           (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
         if (snapshot.hasError) {
-          return Text('Something went wrong');
+          return const Text('Something went wrong');
         }
 
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Text("Loading");
+          return const Text("Loading");
         }
 
         // Updated logic to correctly handle the non-existence of a document
@@ -53,20 +52,20 @@ class Cards extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Color.fromARGB(255, 0, 38, 255),
+      color: const Color.fromARGB(255, 0, 38, 255),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(15),
+          const Padding(
+            padding: EdgeInsets.all(15),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [Text('Operator'), Text('online')],
             ),
           ),
           Container(
-            padding: EdgeInsets.only(top: 30, bottom: 10, left: 10, right: 10),
-            decoration: BoxDecoration(
+            padding: const EdgeInsets.only(top: 30, bottom: 10, left: 10, right: 10),
+            decoration: const BoxDecoration(
               borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(30),
                 topRight: Radius.circular(30),

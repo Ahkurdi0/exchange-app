@@ -54,23 +54,14 @@ class AuthService {
           ));
       return true;
     } on FirebaseAuthException catch (e) {
-      String message = 'An error occurred. Please try again later.';
-      switch (e.code) {
-        case 'user-not-found':
-          message = 'No user found for that email.';
-          break;
-        case 'wrong-password':
-          message = 'Wrong password provided for that user.';
-          break;
-        case 'user-disabled':
-          message = 'This user has been disabled.';
-          break;
-        case 'invalid-email':
-          message = 'The email address is not valid.';
-          break;
-        default:
-          break;
-      }
+      final errorMessages = {
+        'user-not-found': 'No user found for that email.',
+        'wrong-password': 'Wrong password provided for that user.',
+        'user-disabled': 'This user has been disabled.',
+        'invalid-email': 'The email address is not valid.',
+      };
+
+      String message = errorMessages[e.code] ?? 'An error occurred. Please try again later.';
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(message)),
       );
@@ -78,8 +69,7 @@ class AuthService {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content:
-                Text('An unexpected error occurred. Please try again later.')),
+            content: Text('An unexpected error occurred. Please try again later.')),
       );
       return false;
     }

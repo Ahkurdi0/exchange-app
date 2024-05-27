@@ -1,19 +1,13 @@
 import 'package:exchnage_app/models/BranchModel.dart';
 import 'package:exchnage_app/models/ExchangeRateModel.dart';
 import 'package:exchnage_app/models/TransactionModel.dart';
-import 'package:exchnage_app/models/UserModel.dart';
 import 'package:exchnage_app/pages/review_page.dart';
 import 'package:exchnage_app/services/db.dart';
 import 'package:exchnage_app/utils/appvalidator.dart';
-import 'package:exchnage_app/widgets/icons_list.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:exchnage_app/widgets/category_dropdown.dart';
 import 'package:exchnage_app/widgets/operator.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
-import 'package:intl/intl.dart';
-import 'package:vibration/vibration.dart';
 
 class AddTransactionForm extends StatefulWidget {
   const AddTransactionForm({super.key});
@@ -46,10 +40,7 @@ class _AddTransactionFormState extends State<AddTransactionForm> {
     final amount = double.tryParse(sendEditControl.text) ?? 0;
     final commissionOne = categoryOne?.commissionAmount ?? 0;
     final commissionTwo = categoryTwo?.commissionAmount ?? 0;
-    // commission = amount * (ownerCommission + commissionOne + commissionTwo);
 
-    print("<><<<<<<<<>" + commission.toString());
-    // check if the currency of cat one and cat two were different
     double exchangeRate = 1.0;
     if (categoryOne?.currency != categoryTwo?.currency) {
       ExchangeRate rate = rates.firstWhere(
@@ -107,149 +98,6 @@ class _AddTransactionFormState extends State<AddTransactionForm> {
         ),
       );
     }
-
-    // showDialog(
-    //   context: context,
-    //   builder: (context) => AlertDialog(
-    //     title: const Text('Invalid Input'),
-    //     content: Column(
-    //       children: [
-    //         Text(categoryOne?.branchName ?? ''),
-    //         Text(categoryTwo?.branchName ?? ''),
-    //         Text(sendEditControl.value.text),
-    //         Text(reciveEditControl.value.text),
-    //       ],
-    //     ),
-    //     actions: [
-    //       TextButton(
-    //         onPressed: () => Navigator.of(context).pop(),
-    //         child: const Text('OK'),
-    //       ),
-    //     ],
-    //   ),
-    // );
-
-    // double sendAmount = double.tryParse(sendEditControl.text) ?? 0;
-    // if (sendEditControl.text.isEmpty ||
-    //     reciveEditControl.text.isEmpty ||
-    //     toPhoneController.text.isEmpty ||
-    //     sendAmount < 30000 ||
-    //     sendAmount > 3000000) {
-    //   String errorMessage = 'Please check and fill all the fields correctly.';
-    //   if (sendAmount < 30000 || sendAmount > 3000000) {
-    //     errorMessage = 'Amount must be between 30,000 and 3,000,000.';
-    //   }
-    //   showDialog(
-    //     context: context,
-    //     builder: (context) => AlertDialog(
-    //       title: const Text('Invalid Input'),
-    //       content: Text(errorMessage),
-    //       actions: [
-    //         TextButton(
-    //           onPressed: () => Navigator.of(context).pop(),
-    //           child: const Text('OK'),
-    //         ),
-    //       ],
-    //     ),
-    //   );
-    //   Vibration.vibrate();
-    //   return;
-    // }
-
-    // setState(() {
-    //   isLoader = true;
-    // });
-
-    // final user = FirebaseAuth.instance.currentUser;
-    // if (user == null) {
-    //   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-    //       content:
-    //           Text("You are not logged in. Please log in and try again.")));
-    //   setState(() {
-    //     isLoader = false;
-    //   });
-    //   return;
-    // }
-
-    // int timestamp = DateTime.now().microsecondsSinceEpoch;
-    // var recive = int.parse(reciveEditControl.text);
-    // var reciverInfo = int.parse(toPhoneController.text);
-    // DateTime date = DateTime.now();
-    // var id = uid.v4();
-    // String monthyear = DateFormat('MMM y').format(date);
-
-    // final userDoc = await FirebaseFirestore.instance
-    //     .collection('users')
-    //     .doc(user.uid)
-    //     .get();
-
-    // if (!userDoc.exists) {
-    //   showDialog(
-    //     context: context,
-    //     builder: (context) => AlertDialog(
-    //       title: const Text('User not found'),
-    //       content: const Text('No such user exists in the database.'),
-    //       actions: [
-    //         TextButton(
-    //           onPressed: () {
-    //             Navigator.of(context).pop();
-    //             setState(() {
-    //               isLoader = false;
-    //             });
-    //           },
-    //           child: const Text('OK'),
-    //         ),
-    //       ],
-    //     ),
-    //   );
-    //   return;
-    // }
-
-    // int remainingAmount = userDoc.data()?['remainingAmount'] ?? 0;
-    // int totalDebit = userDoc.data()?['totalDebit'] ?? 0;
-    // int totalCredit = userDoc.data()?['totalCredit'] ?? 0;
-
-    // await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
-    //   "remainingAmount": remainingAmount - sendAmount,
-    //   "totalDebit": totalDebit + sendAmount,
-    //   "totalCredit": totalCredit + recive,
-    //   "updatedAt": timestamp
-    // });
-
-    // var data = {
-    //   "id": id,
-    //   "send": sendAmount,
-    //   "recive": recive,
-    //   "reciverInfo": reciverInfo,
-    //   "categoryOne": categoryOne,
-    //   "categoryTwo": categoryTwo,
-    //   "timestamp": timestamp,
-    //   "monthyear": monthyear,
-    //   "totalCredit": totalCredit,
-    //   "totalDebit": totalDebit,
-    //   "remainingAmount": remainingAmount,
-    //   "category": selectedCategory['name'],
-    //   "type": 'pending',
-    //   "commission": commission,
-    // };
-
-    // try {
-    //   await FirebaseFirestore.instance
-    //       .collection('users')
-    //       .doc(user.uid)
-    //       .collection('transactions')
-    //       .doc(id)
-    //       .set(data, SetOptions(merge: true));
-    // } catch (e) {
-    //   print("Error writing document: $e");
-    // }
-
-    // setState(() {
-    //   sendEditControl.clear();
-    //   reciveEditControl.clear();
-    //   toPhoneController.clear();
-    //   isLoader = false;
-    // });
   }
 
   @override
@@ -274,8 +122,14 @@ class _AddTransactionFormState extends State<AddTransactionForm> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('You Send', style: TextStyle(fontSize: 22)),
-                  const SizedBox(height: 6),
+                  const Text('You Send',
+                      style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF0B59D7))),
+                  const SizedBox(
+                    height: 10,
+                  ),
                   CategoryDropDown(
                       branches: branches
                           .where((branch) =>
@@ -289,26 +143,80 @@ class _AddTransactionFormState extends State<AddTransactionForm> {
                           updateAmounts();
                         });
                       }),
-                  const SizedBox(height: 16),
-                  const Text('Send the amount', style: TextStyle(fontSize: 22)),
+                  const SizedBox(height: 20),
                   TextFormField(
                     controller: sendEditControl,
                     keyboardType: TextInputType.number,
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
                     decoration: InputDecoration(
-                      hintText: '0',
+                      labelText: 'Send Amount ', // This is the label
+                      labelStyle: const TextStyle(
+                          color: Colors.blue), // Style for the label
+                      hintText: '0.0',
+                      hintStyle: const TextStyle(
+                          color: Colors.grey), // Style for the hint
                       suffix: Text(categoryOne?.currency ?? 'IQD'),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(
+                            10), // Rounded rectangle border
+                        borderSide: const BorderSide(
+                            color: Colors.blue,
+                            width: 2), // Border color and width
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide:
+                            const BorderSide(color: Colors.blue, width: 2),
+                      ),
+                      errorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide:
+                            const BorderSide(color: Colors.red, width: 2),
+                      ),
+                      focusedErrorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide:
+                            const BorderSide(color: Colors.red, width: 2),
+                      ),
                     ),
-                    validator: (value) => AppValidator().isEmptyCheak(value),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter a number between 30000 and 3000000';
+                      }
+                      final number = int.tryParse(value);
+                      if (number == null ||
+                          number < 30000 ||
+                          number > 3000000) {
+                        return 'Please enter a amount between 30000 and 3000000';
+                      }
+                      return null;
+                    },
                     onChanged: (value) {
                       setState(() {
                         updateAmounts();
                       });
                     },
                   ),
-                  const Text('Minimum amount: 30,000 Maximum : 3,000,000',
-                      style: TextStyle(fontSize: 14, color: Colors.red)),
-                  const SizedBox(height: 16),
-                  const Text('You Get', style: TextStyle(fontSize: 22)),
+                  const SizedBox(height: 20),
+                  Container(
+                    height: 5, // This will be the thickness of your line
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0B59D7).withOpacity(.9),
+                      borderRadius: BorderRadius.circular(
+                          8), // This will be the radius of your line
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  const Text('You Get',
+                      style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF0B59D7))),
+                  const SizedBox(
+                    height: 10,
+                  ),
                   CategoryDropDown(
                     branches: branches
                         .where((branch) =>
@@ -324,13 +232,29 @@ class _AddTransactionFormState extends State<AddTransactionForm> {
                     },
                   ),
                   const SizedBox(height: 16),
-                  const Text('Get the amount', style: TextStyle(fontSize: 22)),
                   TextFormField(
                     controller: reciveEditControl,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
+                      labelText: 'Get Amount', // This is the label
+                      labelStyle: const TextStyle(
+                          color: Colors.blue), // Style for the label
                       hintText: '0',
+                      hintStyle: const TextStyle(
+                          color: Colors.grey), // Style for the hint
                       suffix: Text(categoryTwo?.currency ?? 'IQD'),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(
+                            10), // Rounded rectangle border
+                        borderSide: const BorderSide(
+                            color: Colors.blue,
+                            width: 2), // Border color and width
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide:
+                            const BorderSide(color: Colors.blue, width: 2),
+                      ),
                     ),
                     onChanged: (value) {
                       setState(() {
@@ -339,34 +263,112 @@ class _AddTransactionFormState extends State<AddTransactionForm> {
                     },
                   ),
                   Text('Commission: ${commission.toStringAsFixed(2)}',
-                      style: const TextStyle(fontSize: 14, color: Colors.red)),
-                  const SizedBox(height: 16),
-                  Text('Your ${categoryTwo?.branchName ?? 'Fib'} number',
-                      style: const TextStyle(fontSize: 22)),
+                      style: const TextStyle(
+                          fontSize: 14, color: Color(0xFF0B59D7))),
+                  const SizedBox(height: 30),
+                  Text(
+                      'Your ${categoryTwo?.branchName ?? 'Fib'} Account Number',
+                      style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF0B59D7))),
                   TextFormField(
                     controller: toPhoneController,
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
                     keyboardType: TextInputType.number,
-                    validator: (value) =>
-                        AppValidator().phoneNumberValidator(value),
                     decoration: InputDecoration(
-                        hintText:
-                            'Your ${categoryTwo?.branchName ?? 'Fib'} number'),
+                      prefix: const Text('07'),
+                      labelStyle: const TextStyle(
+                          color: Colors.blue), // Style for the label
+                      hintText: 'Enter Phone Number',
+                      hintStyle: const TextStyle(
+                          color: Colors.grey), // Style for the hint
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(
+                            10), // Rounded rectangle border
+                        borderSide: const BorderSide(
+                            color: Colors.blue,
+                            width: 2), // Border color and width
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide:
+                            const BorderSide(color: Colors.blue, width: 2),
+                      ),
+                      errorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide:
+                            const BorderSide(color: Colors.red, width: 2),
+                      ),
+                      focusedErrorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide:
+                            const BorderSide(color: Colors.red, width: 2),
+                      ),
+                    ),
+                    validator: (value) {
+                      RegExp regExp = RegExp(r'^[0-9]{9}$');
+                      if (value?.isEmpty ?? true) {
+                        return "Please enter phone number! 07********";
+                      } else if (!regExp.hasMatch(value!)) {
+                        return "Please enter 9 digits for your phone number!";
+                      }
+                      return null;
+                    },
                   ),
                   const SizedBox(height: 16),
                   Center(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        // if (!isLoader) {
-                        //   navigateToReviewPage();
-                        // }
+                    child: SizedBox(
+                      height: 50,
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          if (!isLoader) {
+                            navigateToReviewPage();
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF0B59D7),
+                        ),
+                        child: isLoader
+                            ? const CircularProgressIndicator()
+                            : const Text(
+                                'Exchange',
+                                style: TextStyle(
+                                    fontSize: 18, color: Colors.white),
+                              ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
 
-                        ExchangeRate exchangeRate = ExchangeRate(
-                          uId: uid.v4(),
-                          fromCurrency: "IQD",
-                          rate: 0.00076,
-                          toCurrency: "USD",
-                        );
-                        db.addExchangeRate(exchangeRate);
+
+
+
+
+
+
+
+
+
+
+
+
+ // ExchangeRate exchangeRate = ExchangeRate(
+                        //   uId: uid.v4(),
+                        //   fromCurrency: "IQD",
+                        //   rate: 0.00076,
+                        //   toCurrency: "USD",
+                        // );
+                        // db.addExchangeRate(exchangeRate);
 
                         //   BranchModel branchModel = BranchModel(
                         //       api: "https:v1/api",
@@ -381,18 +383,3 @@ class _AddTransactionFormState extends State<AddTransactionForm> {
                         //       uId: uid.v4());
 
                         //   Db().addBranch(branchModel);
-                      },
-                      child: isLoader
-                          ? const CircularProgressIndicator()
-                          : const Text('Exchange'),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}

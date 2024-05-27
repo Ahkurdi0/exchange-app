@@ -75,16 +75,16 @@ class _SignUpState extends State<SignUp> {
                 ),
                 const SizedBox(height: 16),
                 const Text(
-                  'Create new Account',
+                  'Create New Account',
                   style: TextStyle(
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w700,
                     fontSize: 28,
                     color: Color(0xFF0B59D7),
                   ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(
-                  height: 16,
+                  height: 40,
                 ),
                 TextFormField(
                     controller: _firstNameController,
@@ -111,11 +111,8 @@ class _SignUpState extends State<SignUp> {
                   controller: _phoneController,
                   keyboardType: TextInputType.phone,
                   autovalidateMode: AutovalidateMode.onUserInteraction,
-                  decoration: _buildInputDecoration(
-                    'Phone Number',
-                    Icons.phone,
-                    prefixText: '07'
-                  ),
+                  decoration: _buildInputDecoration('Phone Number', Icons.phone,
+                      prefixText: '07'),
                   validator: (value) {
                     RegExp regExp = RegExp(r'^[0-9]{9}$');
                     if (value?.isEmpty ?? true) {
@@ -133,7 +130,7 @@ class _SignUpState extends State<SignUp> {
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     decoration: _buildInputDecoration('Password', Icons.lock),
                     validator: appValidator.validatePassword),
-                const SizedBox(height: 20),
+                const SizedBox(height: 70),
                 SizedBox(
                   height: 50,
                   width: double.infinity,

@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:exchnage_app/models/UserModel.dart';
 import 'package:exchnage_app/services/db.dart';
 import 'package:flutter/material.dart';
@@ -34,158 +33,189 @@ class _ReviewPageState extends State<ReviewPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Transaction'),
+        title: const Text('Transaction Review'),
+        centerTitle: true,
       ),
-      body: ListView(
-        children: <Widget>[
-          ListTile(
-            title: const Text('Transaction ID'),
-            subtitle: Text(widget.transaction.uId ?? 'N/A'),
-          ),
-          Row(
-            children: [
-              Expanded(
-                child: ListTile(
-                  title: const Text('To Branch'),
-                  subtitle:
-                      Text(widget.transaction.toBranch?.branchName ?? 'N/A'),
-                ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: <Widget>[
+            Expanded(
+              child: ListView(
+                children: <Widget>[
+                  _buildTransactionDetailTile(
+                      'Transaction ID', widget.transaction.uId),
+                  const SizedBox(height: 8.0),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildTransactionDetailTile('To Branch',
+                            widget.transaction.toBranch?.branchName),
+                      ),
+                      Expanded(
+                        child: _buildTransactionDetailTile('From Branch',
+                            widget.transaction.fromBranch?.branchName),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8.0),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildTransactionDetailTile('Sending Amount',
+                            widget.transaction.sendingAmount?.toString()),
+                      ),
+                      Expanded(
+                        child: _buildTransactionDetailTile('Receiving Amount',
+                            widget.transaction.receivingAmount?.toString()),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8.0),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildTransactionDetailTile('Total Commission',
+                            widget.transaction.totalCommission?.toString()),
+                      ),
+                      Expanded(
+                        child: _buildTransactionDetailTile(
+                            'Your ${widget.transaction.toBranch?.branchName} Phone',
+                            widget.transaction.toPhone),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8.0),
+                  SizedBox(
+                    height: 200,
+                    child: _buildTransactionDetailTile('From Branch QR Code',
+                        widget.transaction.fromBranch?.qrCodeUrl,
+                        isImage: true),
+                  ),
+                  const SizedBox(height: 15),
+                  if (imagePath != null)
+                    Text(
+                      'Uploaded Image: ${path.basename(imagePath!)}',
+                      style: const TextStyle(
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.blue),
+                    ),
+                  const SizedBox(height: 8.0),
+                  ElevatedButton.icon(
+                    onPressed: _pickImage,
+                    icon: const Icon(Icons.upload_file),
+                    label: const Text("Upload Transaction Document"),
+                  ),
+                ],
               ),
-              Expanded(
-                child: ListTile(
-                  title: const Text('From Branch'),
-                  subtitle:
-                      Text(widget.transaction.fromBranch?.branchName ?? 'N/A'),
-                ),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              Expanded(
-                child: ListTile(
-                  title: const Text('Sending Amount'),
-                  subtitle: Text(
-                      widget.transaction.sendingAmount?.toString() ?? 'N/A'),
-                ),
-              ),
-              Expanded(
-                child: ListTile(
-                  title: const Text('Receiving Amount'),
-                  subtitle: Text(
-                      widget.transaction.receivingAmount?.toString() ?? 'N/A'),
-                ),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              Expanded(
-                child: ListTile(
-                  title: const Text('Total Commission'),
-                  subtitle: Text(
-                      widget.transaction.totalCommission?.toString() ?? 'N/A'),
-                ),
-              ),
-              Expanded(
-                child: ListTile(
-                  title: Text(
-                      'Your ${widget.transaction.toBranch?.branchName} Phone'),
-                  subtitle: Text(widget.transaction.toPhone ?? 'N/A'),
-                ),
-              ),
-            ],
-          ),
-          Column(
-            children: [
-              SizedBox(
-                height: 200,
-                child: ListTile(
-                  title: const Text('From Branch QR Code'),
-                  subtitle: widget.transaction.fromBranch?.qrCodeUrl != null ||
-                          (widget.transaction.fromBranch?.qrCodeUrl
-                                  ?.isNotEmpty ??
-                              false)
-                      ? Image.network(
-                          widget.transaction.fromBranch!.qrCodeUrl!,
-                        )
-                      : const Text('N/A'),
-                ),
-              ),
-              const SizedBox(
-                height: 15,
-              ),
-              if (imagePath != null)
-                Text(
-                  'Uploaded Image: ${path.basename(imagePath!)}',
-                ),
-              ElevatedButton.icon(
-                onPressed: () async {
-                  final picker = ImagePicker();
-                  final pickedFile =
-                      await picker.pickImage(source: ImageSource.gallery);
-                  if (pickedFile != null) {
-                    setState(() {
-                      imagePath = pickedFile.path;
-                    });
-                  }
-                },
-                icon: const Icon(Icons.upload_file),
-                label: const Text("Upload Transaction Document"),
-              ),
-            ],
-          ),
-        ],
-      ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: ElevatedButton.icon(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blue[800], // This is the background color
-          ),
-          onPressed: isLoading
-              ? null
-              : () async {
-                  // Add this line
-                  setState(() {
-                    isLoading = true; // Add this line
-                  });
-                  if (imagePath != null && currentUserData?.uId != null) {
-                    // Upload to Firebase Storage
-                    firebase_storage.Reference ref =
-                        firebase_storage.FirebaseStorage.instance.ref().child(
-                            'transactionDocuments/${path.basename(imagePath!)}');
-                    await ref.putFile(File(imagePath!));
-
-                    // Get download URL
-                    final String downloadURL = await ref.getDownloadURL();
-
-                    // Save download URL to Firestore
-                    db.addTransaction(
-                      widget.transaction.copyWith(
-                          transactionDocumentUrl: downloadURL,
-                          user: currentUserData),
-                    );
-                  } else {
-                    print(currentUserData.toString());
-                  }
-                  setState(() {
-                    isLoading = false; // Add this line
-                  });
-                },
-          icon: isLoading
-              ? const CircularProgressIndicator()
-              : const Icon(
-                  // Add this line
-                  Icons.payment,
-                  color: Colors.white,
-                ),
-          label: const Text(
-            "Submit",
-            style: TextStyle(color: Colors.white),
-          ),
+            ),
+            _buildSubmitButton(),
+          ],
         ),
       ),
     );
   }
+
+  Widget _buildTransactionDetailTile(String title, String? subtitle,
+      {bool isImage = false}) {
+    return ListTile(
+      title: Text(title,
+          style:
+              const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
+      subtitle: isImage && subtitle != null
+          ? Image.network(subtitle)
+          : Text(subtitle ?? 'N/A', style: const TextStyle(fontSize: 16.0)),
+    );
+  }
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        imagePath = pickedFile.path;
+      });
+    }
+  }
+
+  Widget _buildSubmitButton() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: SizedBox(
+        height: 60,
+        width: double.infinity,
+        child: ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.blue[800],
+            padding: const EdgeInsets.symmetric(vertical: 16.0),
+          ),
+          onPressed: isLoading ? null : _handleSubmit,
+          icon: isLoading
+              ? const CircularProgressIndicator()
+              : const Icon(Icons.payment, color: Colors.white),
+          label: const Text("Submit", style: TextStyle(color: Colors.white)),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _handleSubmit() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    if (imagePath != null && currentUserData?.uId != null) {
+      firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance
+          .ref()
+          .child('transactionDocuments/${path.basename(imagePath!)}');
+      await ref.putFile(File(imagePath!));
+
+      final String downloadURL = await ref.getDownloadURL();
+
+      db.addTransaction(
+        widget.transaction.copyWith(
+          transactionDocumentUrl: downloadURL,
+          user: currentUserData,
+        ),
+      );
+    }
+
+    setState(() {
+      isLoading = false;
+    });
+    Navigator.pop(context);
+Future<void> _handleSubmit() async {
+  setState(() {
+    isLoading = true;
+  });
+
+  if (imagePath != null && currentUserData?.uId != null) {
+    firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance
+        .ref()
+        .child('transactionDocuments/${path.basename(imagePath!)}');
+    await ref.putFile(File(imagePath!));
+
+    final String downloadURL = await ref.getDownloadURL();
+
+    db.addTransaction(
+      widget.transaction.copyWith(
+        transactionDocumentUrl: downloadURL,
+        user: currentUserData,
+      ),
+    );
+    
+
+    // Reset imagePath and currentUserData
+    imagePath = null;
+    currentUserData = null;
+  }
+
+  setState(() {
+    isLoading = false;
+  });
+
+  // Navigate back to the "add exchange" page
+  Navigator.pop(context);
+}  }
 }

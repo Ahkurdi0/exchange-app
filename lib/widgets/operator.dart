@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart'; // Use this package for date and time formatting
 
 class Operator extends StatefulWidget {
@@ -16,7 +18,8 @@ class _OperatorState extends State<Operator> {
   void initState() {
     super.initState();
     // Update the state every minute to ensure it reflects any change in active/inactive status
-    timer = Timer.periodic(Duration(minutes: 1), (Timer t) => setState(() {}));
+    timer = Timer.periodic(
+        const Duration(minutes: 1), (Timer t) => setState(() {}));
   }
 
   @override
@@ -35,67 +38,70 @@ class _OperatorState extends State<Operator> {
         DateTime(now.year, now.month, now.day + 1, 0, 0); // 12:00 AM next day
 
     bool isActive = now.isAfter(startTime) && now.isBefore(endTime);
-    Color color = isActive ? Colors.green : Colors.black;
+    Color color =
+        isActive ? const Color.fromARGB(255, 0, 255, 8) : Colors.black;
     String status = isActive ? "Active" : "Inactive";
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 200,
-          height: 70,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(10)),
-            color: Color.fromARGB(188, 106, 206, 252),
-          ),
-          child: Center(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.person, size: 40),
-                SizedBox(width: 5),
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "Operator - $formattedDate",
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Text(
-                        status,
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold),
-                      ),
-                    ],
+    var padding = Padding(
+      padding: EdgeInsets.all(10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            children: [
+              Text(
+                'Working Time',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 25,
+                    fontWeight: FontWeight.bold),
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              Row(
+                children: [
+                  Container(
+                    width: 20,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      borderRadius:
+                          const BorderRadius.all(Radius.circular(12.5)),
+                      color: color,
+                    ),
                   ),
-                ),
-                SizedBox(width: 10),
-                Container(
-                  width: 25,
-                  height: 25,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(12.5)),
-                    color: color,
+                  const SizedBox(width: 10),
+                  const Text(
+                    "9:00 AM to 12:00 AM",
+                    style: TextStyle(
+                        color: Color.fromARGB(255, 255, 255, 255),
+                        fontSize: 14),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
+            ],
           ),
-        ),
-        SizedBox(height: 10), // Spacing between container and text
-        Text(
-          "Working Hours: 9:00 AM to 12:00 AM",
-          style: TextStyle(color: Colors.blueGrey, fontSize: 14),
-        ),
-      ],
+          Column(
+            children: [
+              Image.asset(
+                'assets/operator.png',
+                width: 80,
+                height: 80,
+                color: Colors.blue.shade900,
+              ),
+            ],
+          )
+        ],
+      ),
+    );
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      height: 100,
+      decoration: BoxDecoration(
+        color: const Color(0xFF0B59D7).withOpacity(0.9),
+        borderRadius: BorderRadius.circular(10), // Rounded rectangle border
+      ),
+      child: padding,
     );
   }
 }
