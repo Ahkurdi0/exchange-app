@@ -349,37 +349,3 @@ class _AddTransactionFormState extends State<AddTransactionForm> {
     );
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
- // ExchangeRate exchangeRate = ExchangeRate(
-                        //   uId: uid.v4(),
-                        //   fromCurrency: "IQD",
-                        //   rate: 0.00076,
-                        //   toCurrency: "USD",
-                        // );
-                        // db.addExchangeRate(exchangeRate);
-
-                        //   BranchModel branchModel = BranchModel(
-                        //       api: "https:v1/api",
-                        //       branchName: "ZainCash",
-                        //       commissionAmount: 0.04,
-                        //       currency: "USD",
-                        //       hasApi: false,
-                        //       iconUrl:"https://firebasestorage.googleapis.com/v0/b/exchnage-wallet-kurd.appspot.com/o/icons%2Fqiservice.png?alt=media&token=ef046146-8186-4c53-a15d-5efcf00d907c",
-                        //       phoneNumber: "",
-                        //       qrCodeUrl: "https://firebasestorage.googleapis.com/v0/b/exchnage-wallet-kurd.appspot.com/o/qr%2Ffib_qr.png?alt=media&token=f6bd698c-03a4-47c6-a04f-4417b62c8756",
-                        //       qrCodeValue: "",
-                        //       uId: uid.v4());
-
-                        //   Db().addBranch(branchModel);
